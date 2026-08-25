@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, ActivityIndicator, RefreshControl, Button, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, ActivityIndicator, RefreshControl, Button, StyleSheet, TouchableOpacity } from 'react-native';
 import { useProdutos } from '../hooks/useProdutos';
 
-export function Listagem({ navigation }: any) {
+export function Home({ navigation }: any) {
+  console.log('🔵 Tela Home renderizada');
+
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
   const { data, isLoading, error, refetch, isFetching } = useProdutos(page, search);
@@ -50,10 +52,12 @@ export function Listagem({ navigation }: any) {
         data={data.data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <View style={styles.card}>
-            <Text style={styles.productName}>{item.name}</Text>
-            <Text>{item.description?.slice(0, 80)}...</Text>
-          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Detalhe', { id: item.id })}>
+            <View style={styles.card}>
+              <Text style={styles.productName}>{item.name}</Text>
+              <Text>{item.description?.slice(0, 80)}...</Text>
+            </View>
+          </TouchableOpacity>
         )}
         refreshControl={
           <RefreshControl refreshing={isFetching} onRefresh={() => refetch()} />

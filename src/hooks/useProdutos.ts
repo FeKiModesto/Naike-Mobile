@@ -6,10 +6,17 @@ export function useProdutos(page: number = 1, search: string = '') {
   return useQuery<PaginatedResponse<Product>, ApiError>({
     queryKey: ['produtos', page, search],
     queryFn: async () => {
-      const response = await api.get('/products', {
-        params: { page, pageSize: 10, search },
-      });
-      return response.data;
+      console.log('🔵 Executando queryFn');
+      try {
+        const response = await api.get('/products', {
+          params: { page, pageSize: 10, search },
+        });
+        console.log('🔵 Resposta recebida', response.data);
+        return response.data;
+      } catch (error) {
+        console.error('🔴 Erro na requisição:', error);
+        throw error;
+      }
     },
     staleTime: 1000 * 60 * 5,
   });
