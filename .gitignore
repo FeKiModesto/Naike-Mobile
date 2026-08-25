@@ -33,6 +33,9 @@ yarn-error.*
 # local env files
 .env*.local
 
+# Ignorar arquivo .env com dados sensíveis
+.env
+
 # typescript
 *.tsbuildinfo
 
