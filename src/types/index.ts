@@ -33,3 +33,29 @@ export interface PaginatedResponse<T> {
   pageSize: number;
   total: number;
 }
+
+export interface VarianteInput {
+  sku: string;
+  price: number;
+  stock: number;
+  attributes: Record<string, string>;
+}
+
+export interface CriarProdutoVariavelInput {
+  name: string;
+  description: string;
+  variants: VarianteInput[];
+}
+
+export interface EntradaEstoque {
+  variantId: string;
+  quantity: number;
+  reason?: string;
+}
+
+export interface RespostaEstoque {
+  variantId: string;
+  quantityBefore: number;
+  quantityAfter: number;
+  updatedAt: string;
+}
