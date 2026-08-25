@@ -1,21 +1,16 @@
 import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import Constants from 'expo-constants';
+
+const extra = Constants.expoConfig?.extra ?? {};
 
 const api = axios.create({
-  baseURL: process.env.API_BASE_URL,
+  baseURL: extra.apiBaseUrl ?? 'https://api.mockmerce.com.br/v1',
   timeout: 10000,
   headers: {
-    'X-API-Key': process.env.API_KEY,
-    'X-Student-RM': process.env.STUDENT_RM,
+    'Content-Type': 'application/json',
+    'X-API-Key': extra.apiKey,
+    'X-Student-RM': extra.studentRm,
   },
-});
-
-api.interceptors.request.use(async (config) => {
-  const token = await SecureStore.getItemAsync('auth_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
-  }
-  return config;
 });
 
 api.interceptors.response.use(
