@@ -6,11 +6,13 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 
 ---
 
-## Missões implementadas
+## Missões concluídas (3/12)
 
-- ✅ **Cadastrar produto** — formulário simples com nome, descrição, SKU, preço e estoque
-- ✅ **Criar produto variável** — produto com múltiplas variantes (cor + tamanho), adição e remoção de variantes na hora
-- ✅ **Gerenciar estoque** — entrada de estoque por ID de variante, com retorno da quantidade antes e depois
+| Missão | XP | Responsável |
+|---|---|---|
+| Cadastrar produto | 10 XP | RM561810 |
+| Criar produto variável | 15 XP | RM561810 |
+| Gerenciar estoque | 10 XP | RM561810 |
 
 ---
 
@@ -44,21 +46,48 @@ API_KEY=sua_chave_aqui
 RM=seu_rm_aqui
 ```
 
-4. Rode o projeto:
+4. Inicie o projeto:
 ```bash
    npx expo start
 ```
 
 ---
 
-## Navegação
+## Como testar as missões
 
-A Home lista os produtos da loja e tem dois botões de acesso rápido:
+### Cadastrar produto
+1. Na Home, toque em **+ Produto variável** → troca pra tela simples não existe ainda, use o painel web em [alun.mockmerce.com.br](https://alun.mockmerce.com.br)
 
-- **+ Produto variável** → tela de cadastro com variantes
-- **📦 Gerenciar estoque** → tela de entrada de estoque por variante
+> A missão de cadastrar produto simples foi feita diretamente via API durante o desenvolvimento.
+
+### Criar produto variável
+1. Na Home, toque em **+ Produto variável**
+2. Preencha nome e descrição
+3. Preencha ao menos uma variante com SKU único (ex: `DUNK-001`), preço, estoque, cor e tamanho
+4. Toque em **Criar produto**
+5. Alert de sucesso confirma a criação
+
+### Gerenciar estoque
+1. Crie um produto variável (passo acima)
+2. Pegue o `variantId` da variante pelo endpoint:
+```
+GET https://api.mockmerce.com.br/v1/products/:id
+```
+3. Na Home, toque em **📦 Gerenciar estoque**
+4. Cole o `variantId`, informe a quantidade e um motivo opcional
+5. Toque em **Registrar entrada**
+6. O card exibe o estoque atualizado
 
 ---
+
+## Estrutura do projeto
+```
+src/
+├── hooks/ # React Query (useProdutos, useProdutoVariavel, useEstoque...)
+├── screens/ # Telas (Home, Detalhe, ProdutoVariavel, Estoque)
+├── services/ # Instância do Axios
+└── types/ # Interfaces TypeScript
+```
 
 ## Grupo
 
