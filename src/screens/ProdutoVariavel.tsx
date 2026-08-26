@@ -47,7 +47,10 @@ export function ProdutoVariavel({ navigation }: any) {
         name: nome,
         description: descricao,
         type: 'VARIABLE',
-        options: ['cor', 'tamanho'],
+        options: [
+          { name: 'cor', values: [...new Set(variantes.map(v => v.cor).filter(Boolean))] },
+          { name: 'tamanho', values: [...new Set(variantes.map(v => v.tamanho).filter(Boolean))] },
+        ],
         variants: variantesFormatadas,
       },
       {
