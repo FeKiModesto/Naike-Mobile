@@ -47,6 +47,7 @@ export function ProdutoVariavel({ navigation }: any) {
         name: nome,
         description: descricao,
         type: 'VARIABLE',
+        options: ['cor', 'tamanho'],
         variants: variantesFormatadas,
       },
       {

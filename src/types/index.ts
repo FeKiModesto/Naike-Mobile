@@ -45,6 +45,7 @@ export interface CriarProdutoVariavelInput {
   name: string;
   description: string;
   type: string;
+  options: string[];
   variants: VarianteInput[];
 }
 
