@@ -40,6 +40,7 @@ export function Home({ navigation }: any) {
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Naike</Text>
       </View>
+
       <TextInput
         style={styles.searchInput}
         placeholder="Buscar produtos..."
@@ -48,6 +49,24 @@ export function Home({ navigation }: any) {
         onChangeText={setSearch}
         onSubmitEditing={() => setPage(1)}
       />
+
+      {/* Ações rápidas */}
+      <View style={styles.acoesContainer}>
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('ProdutoVariavel')}
+        >
+          <Text style={styles.acaoBtnTexto}>+ Produto variável</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('Estoque')}
+        >
+          <Text style={styles.acaoBtnTexto}>📦 Gerenciar estoque</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={data.data}
         keyExtractor={(item) => item.id}
@@ -77,6 +96,15 @@ const styles = StyleSheet.create({
   header: { backgroundColor: '#050061', padding: 20, alignItems: 'center' },
   headerTitle: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
   searchInput: { margin: 10, padding: 10, backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
+  acoesContainer: { flexDirection: 'row', gap: 8, marginHorizontal: 10, marginBottom: 4 },
+  acaoBtn: {
+    flex: 1,
+    backgroundColor: '#050061',
+    borderRadius: 8,
+    padding: 12,
+    alignItems: 'center',
+  },
+  acaoBtnTexto: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
   centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   errorText: { color: 'red', marginBottom: 10 },
   card: { backgroundColor: '#fff', margin: 10, padding: 15, borderRadius: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4 },
