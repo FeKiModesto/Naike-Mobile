@@ -57,7 +57,7 @@ export interface EntradaEstoque {
 
 export interface RespostaEstoque {
   variantId: string;
-  quantityBefore: number;
-  quantityAfter: number;
-  updatedAt: string;
+  sku: string;
+  onHand: number;
+  available: number;
 }

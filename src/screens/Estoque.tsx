@@ -28,7 +28,7 @@ export function Estoque() {
         onSuccess: (res) => {
           Alert.alert(
             'Estoque atualizado!',
-            `Antes: ${res.quantityBefore} → Depois: ${res.quantityAfter}`
+            `SKU: ${res.sku}\nDisponível: ${res.available}`
           );
         },
         onError: (erro) => {
@@ -73,9 +73,9 @@ export function Estoque() {
         <View style={styles.resultado}>
           <Text style={styles.resultadoTitulo}>Última entrada registrada</Text>
           <Text style={styles.resultadoTexto}>Variante: {data.variantId}</Text>
-          <Text style={styles.resultadoTexto}>
-            Estoque: {data.quantityBefore} → {data.quantityAfter}
-          </Text>
+          <Text style={styles.resultadoTexto}>SKU: {data.sku}</Text>
+          <Text style={styles.resultadoTexto}>Em mãos: {data.onHand}</Text>
+          <Text style={styles.resultadoTexto}>Disponível: {data.available}</Text>
         </View>
       )}
 
