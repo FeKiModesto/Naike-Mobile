@@ -43,10 +43,18 @@ export function ProdutoVariavel({ navigation }: any) {
     }));
 
     mutate(
-      { name: nome, description: descricao, variants: variantesFormatadas },
+      {
+        name: nome,
+        description: descricao,
+        type: 'VARIABLE',
+        variants: variantesFormatadas,
+      },
       {
         onSuccess: (produto) => {
-          Alert.alert('Sucesso!', `Produto "${produto.name}" criado com ${produto.variants.length} variante(s).`);
+          Alert.alert(
+            'Sucesso!',
+            `Produto "${produto.name}" criado com ${produto.variants.length} variante(s).`
+          );
           navigation.goBack();
         },
         onError: (erro) => {
