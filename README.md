@@ -94,6 +94,6 @@ src/
 | Nome | RM |
 |---|---|
 | Felipe Kirschner Modesto | 561810 |
-| Vitor Dias dos Santos | 565422 |
 | João Victor Luiz de Oliveira Resende | 565139 |
 | Pedro Henrique Vaz Ferreira | 566551 |
+| Vitor Dias dos Santos | 565422 |
