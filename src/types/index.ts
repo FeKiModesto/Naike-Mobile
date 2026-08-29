@@ -61,3 +61,54 @@ export interface RespostaEstoque {
   onHand: number;
   available: number;
 }
+
+export interface LoginInput {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  token: string;
+  [key: string]: any;
+}
+export interface AdicionarItemCarrinhoInput {
+  variantId: string;
+  quantity: number;
+}
+
+export interface CartItem {
+  variantId: string;
+  quantity: number;
+  [key: string]: any;
+}
+
+export interface Cart {
+  items: CartItem[];
+  [key: string]: any;
+}
+
+export type OrderStatus = 'PENDING' | 'PAID' | 'CANCELLED' | string;
+
+export interface Order {
+  id: string;
+  status: OrderStatus;
+  total?: number;
+  items?: any[];
+  [key: string]: any;
+}
+
+export type MetodoPagamento = 'PIX' | 'CREDIT_CARD' | 'BOLETO';
+
+export interface PagamentoInput {
+  orderId: string;
+  method: MetodoPagamento;
+  simulate?: 'decline';
+}
+
+export interface NotaFiscal {
+  orderId: string;
+  number?: string;
+  key?: string;
+  issuedAt?: string;
+  [key: string]: any;
+}
