@@ -10,6 +10,10 @@ import { CadastroCliente } from './src/screens/CadastroCliente';
 import { ConfigurarWebhook } from './src/screens/ConfigurarWebhook';
 import { CotacaoFrete } from './src/screens/CotacaoFrete';
 import { Pagamento } from './src/screens/Pagamento';
+import { AuthProvider } from './src/contexts/AuthContext';
+import { Login } from './src/screens/Login';
+import { Cadastro } from './src/screens/Cadastro';
+import { Checkout } from './src/screens/Checkout';
 
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
@@ -17,6 +21,7 @@ const queryClient = new QueryClient();
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+        <AuthProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="Home">
           <Stack.Screen name="Home" component={Home} options={{ title: 'Naike' }} />
@@ -27,8 +32,12 @@ export default function App() {
           <Stack.Screen name="ConfigurarWebhook" component={ConfigurarWebhook} options={{ title: 'Configurar Webhook' }} />
           <Stack.Screen name="CotacaoFrete" component={CotacaoFrete} options={{ title: 'Cotar Frete' }} />
           <Stack.Screen name="Pagamento" component={Pagamento} options={{ title: 'Pagamento' }} />
+          <Stack.Screen name="Login" component={Login} options={{ title: 'Login' }} />
+          <Stack.Screen name="Cadastro" component={Cadastro} options={{ title: 'Cadastro' }} />
+          <Stack.Screen name="Checkout" component={Checkout} options={{ title: 'Checkout' }} />
         </Stack.Navigator>
       </NavigationContainer>
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
