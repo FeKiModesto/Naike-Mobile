@@ -112,3 +112,19 @@ export interface NotaFiscal {
   issuedAt?: string;
   [key: string]: any;
 }
+
+export interface CadastroClienteInput {
+  name: string;
+  email: string;
+  password: string;
+  document?: string;
+}
+
+export interface CadastroClienteResponse {
+  token: string;
+  customer?: {
+    id: string;
+    name: string;
+    email: string;
+  };
+}

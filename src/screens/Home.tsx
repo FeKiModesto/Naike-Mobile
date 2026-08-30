@@ -67,6 +67,36 @@ export function Home({ navigation }: any) {
         </TouchableOpacity>
       </View>
 
+      <View style={styles.acoesContainer}>
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('CadastroCliente')}
+        >
+          <Text style={styles.acaoBtnTexto}>👤 Cadastrar cliente</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('ConfigurarWebhook')}
+        >
+          <Text style={styles.acaoBtnTexto}>🔗 Configurar webhook</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('CotacaoFrete')}
+        >
+          <Text style={styles.acaoBtnTexto}>🚚 Cotar frete</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('Pagamento')}
+        >
+          <Text style={styles.acaoBtnTexto}>💳 Pagamento</Text>
+        </TouchableOpacity>
+      </View>
+
       <FlatList
         data={data.data}
         keyExtractor={(item) => item.id}
