@@ -9,6 +9,7 @@ import { Estoque } from './src/screens/Estoque';
 import { CadastroCliente } from './src/screens/CadastroCliente';
 import { ConfigurarWebhook } from './src/screens/ConfigurarWebhook';
 import { CotacaoFrete } from './src/screens/CotacaoFrete';
+import { Pagamento } from './src/screens/Pagamento';
 
 const Stack = createNativeStackNavigator();
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ export default function App() {
           <Stack.Screen name="CadastroCliente" component={CadastroCliente} options={{ title: 'Cadastrar Cliente' }} />
           <Stack.Screen name="ConfigurarWebhook" component={ConfigurarWebhook} options={{ title: 'Configurar Webhook' }} />
           <Stack.Screen name="CotacaoFrete" component={CotacaoFrete} options={{ title: 'Cotar Frete' }} />
+          <Stack.Screen name="Pagamento" component={Pagamento} options={{ title: 'Pagamento' }} />
         </Stack.Navigator>
       </NavigationContainer>
     </QueryClientProvider>

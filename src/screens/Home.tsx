@@ -88,6 +88,13 @@ export function Home({ navigation }: any) {
         >
           <Text style={styles.acaoBtnTexto}>🚚 Cotar frete</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.acaoBtn}
+          onPress={() => navigation.navigate('Pagamento')}
+        >
+          <Text style={styles.acaoBtnTexto}>💳 Pagamento</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
