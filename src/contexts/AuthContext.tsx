@@ -1,70 +1,62 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import * as SecureStore from "expo-secure-store";
-import api from "../services/api";
-import { setAuthToken } from "../services/authToken";
-import { LoginInput, LoginResponse, ApiError } from "../types";
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { Platform } from 'react-native';
+import api from '../services/api';
+import { setAuthToken } from '../services/authToken';
 
-const TOKEN_KEY = "naike_client_token";
+async function getStoredToken() {
+  if (Platform.OS === 'web') return localStorage.getItem('naike_cliente_token');
+  const SecureStore = await import('expo-secure-store');
+  return SecureStore.getItemAsync('naike_cliente_token');
+}
+async function saveStoredToken(token: string) {
+  if (Platform.OS === 'web') { localStorage.setItem('naike_cliente_token', token); return; }
+  const SecureStore = await import('expo-secure-store');
+  await SecureStore.setItemAsync('naike_cliente_token', token);
+}
+async function removeStoredToken() {
+  if (Platform.OS === 'web') { localStorage.removeItem('naike_cliente_token'); return; }
+  const SecureStore = await import('expo-secure-store');
+  await SecureStore.deleteItemAsync('naike_cliente_token');
+}
 
-interface AuthContextValue {
+interface AuthContextData {
   token: string | null;
   isLoggedIn: boolean;
   isLoading: boolean;
-  login: (dados: LoginInput) => Promise<void>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextData>({} as AuthContextData);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const salvo = await SecureStore.getItemAsync(TOKEN_KEY);
-        if (salvo) {
-          setToken(salvo);
-          setAuthToken(salvo);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    })();
+    getStoredToken().then((saved) => {
+      if (saved) { setToken(saved); setAuthToken(saved); }
+    }).finally(() => setIsLoading(false));
   }, []);
 
-  async function login(dados: LoginInput) {
-    try {
-      const response = await api.post<LoginResponse>("/auth/login", dados);
-      const { token: novoToken } = response.data;
-      setToken(novoToken);
-      setAuthToken(novoToken);
-      await SecureStore.setItemAsync(TOKEN_KEY, novoToken);
-    } catch (error) {
-      throw error as ApiError;
-    }
+  async function login(email: string, password: string) {
+    const { data } = await api.post('/auth/login', { email, password });
+    setToken(data.token);
+    setAuthToken(data.token);
+    await saveStoredToken(data.token);
   }
 
   async function logout() {
     setToken(null);
     setAuthToken(null);
-    await SecureStore.deleteItemAsync(TOKEN_KEY);
+    await removeStoredToken();
   }
 
   return (
-    <AuthContext.Provider
-      value={{ token, isLoggedIn: !!token, isLoading, login, logout }}
-    >
+    <AuthContext.Provider value={{ token, isLoggedIn: !!token, isLoading, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth precisa ser usado dentro de um <AuthProvider>");
-  }
-  return ctx;
-}
+export function useAuth() { return useContext(AuthContext); }
