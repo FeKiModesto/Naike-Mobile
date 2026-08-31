@@ -38,7 +38,7 @@ export interface VarianteInput {
   sku: string;
   price: number;
   stock: number;
-  attributes: Record<string, string>;
+  options: Record<string, string>;
 }
 
 export interface CriarProdutoVariavelInput {

@@ -35,12 +35,12 @@ export function ProdutoVariavel({ navigation }: any) {
       return;
     }
 
-    const variantesFormatadas = variantes.map((v) => ({
-      sku: v.sku,
-      price: parseFloat(v.price),
-      stock: parseInt(v.stock, 10),
-      attributes: { cor: v.cor, tamanho: v.tamanho },
-    }));
+  const variantesFormatadas = variantes.map((v) => ({
+    sku: v.sku,
+    price: parseFloat(v.price),
+    stock: parseInt(v.stock, 10),
+    options: { cor: v.cor, tamanho: v.tamanho },
+  }));
 
     mutate(
       {
