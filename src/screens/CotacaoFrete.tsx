@@ -1,119 +1,37 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity,
-  ActivityIndicator, StyleSheet, Alert, ScrollView,
-} from 'react-native';
+import { Text, View } from 'react-native';
 import { useCotacaoFrete } from '../hooks/useCotacaoFrete';
-import { OpcaoFrete } from '../types';
-
-function nomeOpcao(opcao: OpcaoFrete): string {
-  return opcao.service ?? opcao.name ?? opcao.carrier ?? 'Opção de frete';
+import { Button, Chip, Field, Notice, ErrorNotice } from '../components/UI';
+import { isRecord } from '../utils/errors';
+import { money } from '../utils/validation';
+import { ui } from '../theme';
+/** Mantém as formas já tratadas no projeto. Valores ausentes nunca viram frete grátis. */
+export function shippingOptions(value: unknown): { name: string; price: number; days?: number }[] {
+  const raw = Array.isArray(value) ? value : isRecord(value) ? value.options ?? value.quotes : undefined;
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap(item => {
+    if (!isRecord(item)) return [];
+    const name = item.service ?? item.name ?? item.carrier; const price = item.price ?? item.value;
+    const days = item.estimatedDays ?? item.deliveryDays ?? item.deadline;
+    return typeof name === 'string' && typeof price === 'number' ? [{ name, price, days: typeof days === 'number' ? days : undefined }] : [];
+  });
 }
-
-function precoOpcao(opcao: OpcaoFrete): string | null {
-  const preco = opcao.price ?? opcao.value;
-  if (typeof preco !== 'number') return null;
-  return `R$ ${preco.toFixed(2).replace('.', ',')}`;
-}
-
-function prazoOpcao(opcao: OpcaoFrete): string | null {
-  const prazo = opcao.estimatedDays ?? opcao.deliveryDays ?? opcao.deadline;
-  if (prazo === undefined || prazo === null) return null;
-  return typeof prazo === 'number' ? `${prazo} dia(s) útil(eis)` : String(prazo);
-}
-
-export function CotacaoFrete() {
-  const [cep, setCep] = useState('');
-
-  const { mutate, isPending, data } = useCotacaoFrete();
-
-  function enviar() {
-    const somenteNumeros = cep.replace(/\D/g, '');
-
-    if (somenteNumeros.length !== 8) {
-      Alert.alert('Atenção', 'Informe um CEP válido com 8 dígitos.');
-      return;
-    }
-
-    mutate(
-      { cepDestino: somenteNumeros },
-      {
-        onError: (erro) => {
-          Alert.alert('Erro ao calcular frete', erro.message);
-        },
-      }
-    );
+export function CotacaoFrete({ orderId, disabled = false }: { orderId?: string; disabled?: boolean }) {
+  const [cep, setCep] = useState(''); const [validation, setValidation] = useState(''); const [selected, setSelected] = useState<number>();
+  const quote = useCotacaoFrete(); const options = shippingOptions(quote.data);
+  function submit() {
+    const cleaned = cep.replace(/\D/g, '');
+    if (cleaned.length !== 8) { setValidation('Informe um CEP com 8 dígitos.'); return; }
+    setValidation(''); setSelected(undefined); quote.mutate({ cepDestino: cleaned, ...(orderId ? { orderId } : {}) });
   }
-
-  return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titulo}>Cotar Frete</Text>
-      <Text style={styles.subtitulo}>Consulte as opções de entrega para um CEP</Text>
-
-      <Text style={styles.label}>CEP de destino</Text>
-      <TextInput
-        style={styles.input}
-        value={cep}
-        onChangeText={setCep}
-        placeholder="ex: 01310930"
-        keyboardType="numeric"
-        maxLength={9}
-      />
-
-      {data && data.length > 0 && (
-        <View style={styles.resultado}>
-          <Text style={styles.resultadoTitulo}>Opções de frete</Text>
-          {data.map((opcao, indice) => (
-            <View key={indice} style={styles.opcaoFrete}>
-              <Text style={styles.opcaoFreteNome}>{nomeOpcao(opcao)}</Text>
-              {precoOpcao(opcao) !== null && (
-                <Text style={styles.resultadoTexto}>Valor: {precoOpcao(opcao)}</Text>
-              )}
-              {prazoOpcao(opcao) !== null && (
-                <Text style={styles.resultadoTexto}>Prazo: {prazoOpcao(opcao)}</Text>
-              )}
-            </View>
-          ))}
-        </View>
-      )}
-
-      {data && data.length === 0 && (
-        <View style={styles.resultado}>
-          <Text style={styles.resultadoTexto}>Nenhuma opção de frete encontrada para este CEP.</Text>
-        </View>
-      )}
-
-      <TouchableOpacity style={styles.btnEnviar} onPress={enviar} disabled={isPending}>
-        {isPending
-          ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.btnEnviarTexto}>Calcular frete</Text>}
-      </TouchableOpacity>
-    </ScrollView>
-  );
+  return <View style={ui.card}><Text style={ui.heading}>Consulte a entrega</Text>
+    <Field label="CEP de destino" placeholder="00000-000" value={cep} maxLength={9} keyboardType="number-pad"
+      editable={!quote.isPending && !disabled} onChangeText={value => { setCep(value); quote.reset(); setSelected(undefined); }} />
+    {validation && <Notice text={validation} tone="error" />}<ErrorNotice error={quote.error} />
+    <Button title="Calcular frete" secondary loading={quote.isPending} disabled={disabled} onPress={submit} />
+    {options.map((option, i) => <Chip key={option.name + i} selected={selected === i}
+      title={option.name + ' · ' + money(option.price) + (option.days !== undefined ? ' · ' + option.days + ' dias úteis' : '')} onPress={() => setSelected(i)} />)}
+    {quote.isSuccess && !options.length && <Notice text="A API respondeu, mas não retornou opções de frete reconhecidas. Confira a disponibilidade com a loja." />}
+    <Text style={ui.muted}>Cotação informativa. A API de checkout não inclui o frete no total do pedido. Sem um pedido informado, a estimativa usa o padrão de peso da API.</Text>
+  </View>;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
-  titulo: { fontSize: 22, fontWeight: 'bold', color: '#050061', marginTop: 8 },
-  subtitulo: { fontSize: 14, color: '#666', marginBottom: 20 },
-  label: { fontSize: 13, color: '#333', marginBottom: 4, marginTop: 12 },
-  input: {
-    backgroundColor: '#fff', borderWidth: 1, borderColor: '#ddd',
-    borderRadius: 8, padding: 10, fontSize: 14,
-  },
-  resultado: {
-    backgroundColor: '#e8f5e9', borderRadius: 8, padding: 12,
-    marginTop: 20, borderWidth: 1, borderColor: '#a5d6a7',
-  },
-  resultadoTitulo: { fontWeight: 'bold', color: '#2e7d32', marginBottom: 6 },
-  resultadoTexto: { color: '#333', fontSize: 14 },
-  opcaoFrete: {
-    marginTop: 8, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#c8e6c9',
-  },
-  opcaoFreteNome: { fontWeight: 'bold', color: '#2e7d32', fontSize: 15 },
-  btnEnviar: {
-    backgroundColor: '#050061', borderRadius: 8,
-    padding: 14, alignItems: 'center', marginTop: 24,
-  },
-  btnEnviarTexto: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-});

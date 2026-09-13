@@ -1,161 +1,38 @@
 import React, { useState } from 'react';
-import {
-  View, Text, TextInput, TouchableOpacity,
-  ActivityIndicator, StyleSheet, Alert, ScrollView,
-} from 'react-native';
-import { useProcessarPagamento } from '../hooks/useProcessarPagamento';
-import { useReembolso } from '../hooks/useReembolso';
-import { MetodoPagamento } from '../types';
-
-const METODOS: MetodoPagamento[] = ['PIX', 'CREDIT_CARD', 'BOLETO'];
-
-export function Pagamento({ route }: any) {
-  const { orderId } = route.params ?? {};
-  const [metodo, setMetodo] = useState<MetodoPagamento>('CREDIT_CARD');
-  const [simularRecusa, setSimularRecusa] = useState(false);
-
-  const pagamento = useProcessarPagamento();
-  const reembolso = useReembolso();
-
-  function pagar() {
-    if (!orderId) {
-      Alert.alert('Atenção', 'orderId não informado.');
-      return;
-    }
-
-    pagamento.mutate(
-      {
-        orderId,
-        method: metodo,
-        simulate: simularRecusa ? 'decline' : undefined,
-      },
-      {
-        onSuccess: (resposta) => {
-          if (resposta.status === 'DECLINED') {
-            // Tratamento da recusa: mostra motivo e oferece nova tentativa
-            Alert.alert(
-              'Pagamento recusado',
-              resposta.declineReason ?? 'O pagamento não foi aprovado. Tente outro método.'
-            );
-          } else {
-            Alert.alert('Pagamento aprovado!', `Pedido ${resposta.orderId} confirmado.`);
-          }
-        },
-        onError: (erro) => {
-          Alert.alert('Erro ao processar pagamento', erro.message);
-        },
-      }
-    );
-  }
-
-  function reembolsar() {
-    if (!orderId) return;
-
-    reembolso.mutate(
-      { orderId },
-      {
-        onSuccess: (resposta) => {
-          Alert.alert('Reembolso solicitado', `Status: ${resposta.status}`);
-        },
-        onError: (erro) => {
-          Alert.alert('Erro ao reembolsar', erro.message);
-        },
-      }
-    );
-  }
-
-  const recusado = pagamento.data?.status === 'DECLINED';
-
-  return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <Text style={styles.titulo}>Pagamento</Text>
-      <Text style={styles.subtitulo}>Pedido: {orderId ?? '—'}</Text>
-
-      <Text style={styles.label}>Método de pagamento</Text>
-      <View style={styles.metodosRow}>
-        {METODOS.map((m) => (
-          <TouchableOpacity
-            key={m}
-            style={[styles.metodoBtn, metodo === m && styles.metodoBtnAtivo]}
-            onPress={() => setMetodo(m)}
-          >
-            <Text style={[styles.metodoTexto, metodo === m && styles.metodoTextoAtivo]}>
-              {m}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <TouchableOpacity
-        style={styles.checkboxRow}
-        onPress={() => setSimularRecusa((v) => !v)}
-      >
-        <View style={[styles.checkbox, simularRecusa && styles.checkboxAtivo]} />
-        <Text style={styles.checkboxLabel}>Simular pagamento recusado (teste)</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.btnPagar} onPress={pagar} disabled={pagamento.isPending}>
-        {pagamento.isPending
-          ? <ActivityIndicator color="#fff" />
-          : <Text style={styles.btnTexto}>Pagar</Text>}
-      </TouchableOpacity>
-
-      {recusado && (
-        <View style={styles.avisoRecusa}>
-          <Text style={styles.avisoTitulo}>Pagamento recusado</Text>
-          <Text style={styles.avisoTexto}>
-            {pagamento.data?.declineReason ?? 'Tente outro método de pagamento.'}
-          </Text>
-        </View>
-      )}
-
-      <TouchableOpacity
-        style={styles.btnReembolso}
-        onPress={reembolsar}
-        disabled={reembolso.isPending || !orderId}
-      >
-        {reembolso.isPending
-          ? <ActivityIndicator color="#050061" />
-          : <Text style={styles.btnReembolsoTexto}>Reembolsar pedido</Text>}
-      </TouchableOpacity>
-    </ScrollView>
-  );
+import { Switch, Text, View } from 'react-native';
+import { useNavigation, useRoute, type NavigationProp, type RouteProp } from '@react-navigation/native';
+import { usePedido } from '../hooks/usePedidos';
+import { usePagamento } from '../hooks/usePagamento';
+import { useAuth } from '../contexts/AuthContext';
+import { Button, Chip, ErrorNotice, Notice, Page, State, StatusBadge } from '../components/UI';
+import { ui, colors } from '../theme';
+import { money } from '../utils/validation';
+import type { MetodoPagamento } from '../types';
+import type { RootStackParamList } from '../navigation/types';
+export function Pagamento() {
+  const { params } = useRoute<RouteProp<RootStackParamList, 'Pagamento'>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>(); const order = usePedido(params.orderId); const pay = usePagamento(); const { offline } = useAuth();
+  const [method, setMethod] = useState<MetodoPagamento>('PIX'); const [decline, setDecline] = useState(false);
+  const current = order.data;
+  const declined = current?.status === 'PENDING' && (current.payment?.status === 'DECLINED' || (pay.isSuccess && pay.data?.status === 'PENDING'));
+  return <Page><Text style={ui.eyebrow}>ÚLTIMO PASSO</Text><Text style={ui.title}>Seu pagamento</Text>
+    {order.isPending || order.error || !current ? <State loading={order.isPending} error={order.error} action={() => void order.refetch()} /> : <>
+      <View style={ui.card}><Text style={ui.muted}>Pedido #{current.id.slice(-8).toUpperCase()}</Text><Text style={ui.title}>{money(current.total)}</Text><StatusBadge status={current.status} /></View>
+      {current.status === 'PAID' ? <><Notice tone="success" text="Pagamento aprovado! Seu pedido já está no histórico." />
+        <Button title="Ver pedido e emitir NF-e" onPress={() => navigation.navigate('PedidoDetalhe', { id: current.id })} /></> :
+      current.status === 'PENDING' ? <>
+        {declined && <Notice tone="error" text="Pagamento recusado. Seu pedido continua aguardando pagamento. Escolha outro método ou desative a simulação para tentar novamente." />}
+        <Text style={ui.heading}>Como deseja pagar?</Text>
+        {([['PIX', 'Pix'], ['CREDIT_CARD', 'Cartão de crédito'], ['BOLETO', 'Boleto']] as const).map(([value, label]) =>
+          <Chip key={value} title={label} selected={method === value} disabled={pay.isPending} onPress={() => setMethod(value)} />)}
+        <View style={ui.card}><View style={ui.between}><Text style={[ui.body, { flex: 1 }]}>Simular pagamento recusado</Text>
+          <Switch accessibilityLabel="Simular pagamento recusado" value={decline} onValueChange={setDecline} disabled={pay.isPending} trackColor={{ true: colors.navy }} /></View>
+          <Text style={ui.muted}>Ambiente de demonstração. Não são solicitados dados reais de cartão.</Text></View>
+        <ErrorNotice error={pay.error} />
+        <Button title={decline ? 'Testar pagamento recusado' : 'Confirmar pagamento'} loading={pay.isPending} disabled={offline || order.isFetching}
+          onPress={() => pay.mutate({ orderId: current.id, method, simulate: decline ? 'decline' : 'approve' })} />
+      </> : <Notice text="Este pedido não está disponível para pagamento." />}
+      <Button title="Acompanhar meus pedidos" secondary disabled={pay.isPending} onPress={() => navigation.navigate('Loja', { screen: 'Pedidos' })} />
+    </>}
+  </Page>;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5', padding: 16 },
-  titulo: { fontSize: 22, fontWeight: 'bold', color: '#050061', marginTop: 8 },
-  subtitulo: { fontSize: 14, color: '#666', marginBottom: 20 },
-  label: { fontSize: 13, color: '#333', marginBottom: 8, marginTop: 12 },
-  metodosRow: { flexDirection: 'row', gap: 8 },
-  metodoBtn: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 8,
-    paddingVertical: 8, paddingHorizontal: 12, backgroundColor: '#fff',
-  },
-  metodoBtnAtivo: { backgroundColor: '#050061', borderColor: '#050061' },
-  metodoTexto: { color: '#333', fontSize: 13 },
-  metodoTextoAtivo: { color: '#fff', fontWeight: 'bold' },
-  checkboxRow: { flexDirection: 'row', alignItems: 'center', marginTop: 20 },
-  checkbox: {
-    width: 20, height: 20, borderRadius: 4, borderWidth: 1,
-    borderColor: '#999', marginRight: 8,
-  },
-  checkboxAtivo: { backgroundColor: '#050061', borderColor: '#050061' },
-  checkboxLabel: { color: '#333', fontSize: 13 },
-  btnPagar: {
-    backgroundColor: '#050061', borderRadius: 8,
-    padding: 14, alignItems: 'center', marginTop: 24,
-  },
-  btnTexto: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  avisoRecusa: {
-    backgroundColor: '#ffebee', borderRadius: 8, padding: 12,
-    marginTop: 16, borderWidth: 1, borderColor: '#ef9a9a',
-  },
-  avisoTitulo: { fontWeight: 'bold', color: '#c62828', marginBottom: 4 },
-  avisoTexto: { color: '#333', fontSize: 14 },
-  btnReembolso: {
-    borderWidth: 1, borderColor: '#050061', borderRadius: 8,
-    padding: 14, alignItems: 'center', marginTop: 16,
-  },
-  btnReembolsoTexto: { color: '#050061', fontSize: 15, fontWeight: 'bold' },
-});

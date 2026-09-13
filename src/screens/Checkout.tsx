@@ -1,148 +1,28 @@
-import React, { useState } from 'react';
-import {
-  View, Text, TouchableOpacity, ActivityIndicator,
-  StyleSheet, Alert,
-} from 'react-native';
+import React from 'react';
+import { Text, View } from 'react-native';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { useCarrinho } from '../hooks/useCarrinho';
 import { useCheckout } from '../hooks/useCheckout';
-import { usePagamento } from '../hooks/usePagamento';
-import { useEmitirNFe } from '../hooks/useNFe';
-import { Order, MetodoPagamento, NotaFiscal, ApiError } from '../types';
-
-export function Checkout({ navigation }: any) {
-  const [pedido, setPedido] = useState<Order | null>(null);
-  const [nfe, setNfe] = useState<NotaFiscal | null>(null);
-  const { mutate: fazerCheckout, isPending: carregandoCheckout } = useCheckout();
-  const { mutate: pagar, isPending: carregandoPagamento } = usePagamento();
-  const { mutate: emitirNFe, isPending: carregandoNFe } = useEmitirNFe();
-
-  function iniciarCheckout() {
-    fazerCheckout(undefined, {
-      onSuccess: (novoPedido) => {
-        setPedido(novoPedido);
-      },
-      onError: (erro) => {
-        Alert.alert('Erro no checkout', (erro as ApiError).message ?? 'Verifique se há itens no carrinho.');
-      },
-    });
-  }
-
-  function pagarPedido(method: MetodoPagamento) {
-    if (!pedido) return;
-
-    pagar(
-      { orderId: pedido.id, method },
-      {
-        onSuccess: (pedidoAtualizado) => {
-          setPedido(pedidoAtualizado);
-          if (pedidoAtualizado.status !== 'PAID') {
-            Alert.alert('Pagamento não aprovado', `Status do pedido: ${pedidoAtualizado.status}`);
-          }
-        },
-        onError: (erro) => {
-          Alert.alert('Erro ao pagar', (erro as ApiError).message);
-        },
-      }
-    );
-  }
-
-  function emitirNota() {
-    if (!pedido) return;
-
-    emitirNFe(pedido.id, {
-      onSuccess: (notaFiscal) => {
-        setNfe(notaFiscal);
-        Alert.alert('NF-e emitida!', `Número: ${notaFiscal.number ?? notaFiscal.orderId}`);
-      },
-      onError: (erro) => {
-        Alert.alert('Erro ao emitir NF-e', (erro as ApiError).message);
-      },
-    });
-  }
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.titulo}>Finalizar compra</Text>
-
-      {!pedido && (
-        <>
-          <Text style={styles.texto}>
-            O checkout cria o pedido a partir do seu carrinho e reserva o estoque.
-          </Text>
-          <TouchableOpacity style={styles.btn} onPress={iniciarCheckout} disabled={carregandoCheckout}>
-            {carregandoCheckout
-              ? <ActivityIndicator color="#fff" />
-              : <Text style={styles.btnTexto}>Fazer checkout</Text>}
-          </TouchableOpacity>
-        </>
-      )}
-
-      {pedido && (
-        <View style={styles.pedidoBox}>
-          <Text style={styles.pedidoTitulo}>Pedido #{pedido.id}</Text>
-          <Text style={styles.pedidoStatus}>Status: {pedido.status}</Text>
-
-          {pedido.status === 'PENDING' && (
-            <>
-              <Text style={styles.texto}>Escolha a forma de pagamento:</Text>
-              <TouchableOpacity
-                style={styles.btn}
-                onPress={() => pagarPedido('PIX')}
-                disabled={carregandoPagamento}
-              >
-                {carregandoPagamento
-                  ? <ActivityIndicator color="#fff" />
-                  : <Text style={styles.btnTexto}>Pagar com PIX</Text>}
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.btn, styles.btnSecundario]}
-                onPress={() => pagarPedido('CREDIT_CARD')}
-                disabled={carregandoPagamento}
-              >
-                <Text style={styles.btnTexto}>Pagar com cartão</Text>
-              </TouchableOpacity>
-            </>
-          )}
-
-          {pedido.status === 'PAID' && !nfe && (
-            <TouchableOpacity style={styles.btn} onPress={emitirNota} disabled={carregandoNFe}>
-              {carregandoNFe
-                ? <ActivityIndicator color="#fff" />
-                : <Text style={styles.btnTexto}>Emitir NF-e</Text>}
-            </TouchableOpacity>
-          )}
-
-          {nfe && (
-            <View style={styles.nfeBox}>
-              <Text style={styles.nfeTitulo}>NF-e emitida</Text>
-              {nfe.number && <Text style={styles.texto}>Número: {nfe.number}</Text>}
-              {nfe.key && <Text style={styles.texto}>Chave: {nfe.key}</Text>}
-              <TouchableOpacity
-                style={[styles.btn, styles.btnSecundario]}
-                onPress={() => navigation.navigate('Home')}
-              >
-                <Text style={styles.btnTexto}>Voltar para a home</Text>
-              </TouchableOpacity>
-            </View>
-          )}
+import { useAuth } from '../contexts/AuthContext';
+import { Button, ErrorNotice, Page, State } from '../components/UI';
+import { CotacaoFrete } from './CotacaoFrete';
+import { ui } from '../theme';
+import { money } from '../utils/validation';
+import type { RootStackParamList } from '../navigation/types';
+export function Checkout() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>(); const cart = useCarrinho(); const checkout = useCheckout(); const { offline } = useAuth();
+  return <Page><Text style={ui.eyebrow}>1. REVISÃO  /  2. PAGAMENTO</Text><Text style={ui.title}>Tudo pronto?</Text>
+    {cart.isPending || cart.error ? <State loading={cart.isPending} error={cart.error} action={() => void cart.refetch()} /> :
+      !cart.data?.items.length ? <State title="Sua sacola está vazia" text="Escolha uma peça antes de finalizar." actionTitle="Ir para a coleção" action={() => navigation.navigate('Loja', { screen: 'Home' })} /> : <>
+        <View style={ui.card}><Text style={ui.heading}>Resumo da compra</Text>{cart.data.items.map(item => <View key={item.variantId} style={ui.between}>
+          <Text style={[ui.body, { flex: 1 }]}>{item.quantity} × {item.name}</Text><Text style={ui.body}>{money(item.subtotal)}</Text></View>)}
+          <View style={ui.separator} /><View style={ui.between}><Text style={ui.heading}>Total do pedido</Text><Text style={ui.heading}>{money(cart.data.total)}</Text></View>
         </View>
-      )}
-    </View>
-  );
+        <CotacaoFrete disabled={checkout.isPending || offline} />
+        <Text style={ui.muted}>Ao confirmar, suas peças serão reservadas. Você escolhe o pagamento na próxima tela.</Text>
+        <ErrorNotice error={checkout.error} />
+        <Button title="Confirmar pedido e continuar" icon="arrow-forward" loading={checkout.isPending} disabled={offline || cart.isFetching}
+          onPress={() => checkout.mutate(undefined, { onSuccess: order => navigation.reset({ index: 1, routes: [{ name: 'Loja' }, { name: 'Pagamento', params: { orderId: order.id } }] }) })} />
+      </>}
+  </Page>;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 20 },
-  titulo: { fontSize: 22, fontWeight: 'bold', color: '#050061', marginBottom: 16 },
-  texto: { fontSize: 14, color: '#444', marginBottom: 16 },
-  btn: {
-    backgroundColor: '#050061', borderRadius: 8,
-    padding: 14, alignItems: 'center', marginBottom: 12,
-  },
-  btnSecundario: { backgroundColor: '#333' },
-  btnTexto: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
-  pedidoBox: { marginTop: 12 },
-  pedidoTitulo: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
-  pedidoStatus: { fontSize: 14, color: '#666', marginBottom: 16 },
-  nfeBox: { marginTop: 16, borderTopWidth: 1, borderTopColor: '#eee', paddingTop: 16 },
-  nfeTitulo: { fontSize: 16, fontWeight: 'bold', color: '#050061', marginBottom: 8 },
-});

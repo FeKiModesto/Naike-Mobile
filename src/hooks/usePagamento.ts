@@ -1,15 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import api from "../services/api";
-import { Order, PagamentoInput, ApiError } from "../types";
-
+import { useAction } from './useAction';
+import { shopService } from '../services/shopService';
+import { keys, queryClient } from '../lib/queryClient';
+import { useAuth } from '../contexts/AuthContext';
 export function usePagamento() {
-  return useMutation<Order, ApiError, PagamentoInput>({
-    mutationFn: async ({ orderId, method, simulate }) => {
-      const response = await api.post(`/orders/${orderId}/pay`, {
-        method,
-        ...(simulate ? { simulate } : {}),
-      });
-      return response.data;
-    },
-  });
+  const { customer } = useAuth();
+  return useAction({ mutationFn: shopService.pay, onSettled: async () => {
+    await Promise.all([queryClient.invalidateQueries({ queryKey: keys.orders(customer?.id ?? '') }), queryClient.invalidateQueries({ queryKey: keys.products })]);
+  } });
 }

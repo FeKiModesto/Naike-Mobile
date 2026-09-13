@@ -1,12 +1,10 @@
-import { useMutation } from "@tanstack/react-query";
-import api from "../services/api";
-import { Order, ApiError } from "../types";
-
+import { useAction } from './useAction';
+import { shopService } from '../services/shopService';
+import { useAuth } from '../contexts/AuthContext';
+import { keys, queryClient } from '../lib/queryClient';
 export function useCheckout() {
-  return useMutation<Order, ApiError, void>({
-    mutationFn: async () => {
-      const response = await api.post("/orders/checkout");
-      return response.data;
-    },
-  });
+  const { customer } = useAuth();
+  return useAction({ mutationFn: shopService.checkout, onSuccess: async () => {
+    await Promise.all([queryClient.invalidateQueries({ queryKey: keys.private(customer?.id ?? '') }), queryClient.invalidateQueries({ queryKey: keys.products })]);
+  } });
 }
