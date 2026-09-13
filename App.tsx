@@ -12,6 +12,7 @@ import { queryClient } from './src/lib/queryClient';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { Home } from './src/screens/Home';
 import { Detalhe } from './src/screens/Detalhe';
+import { BoasVindas } from './src/screens/BoasVindas';
 import { Login } from './src/screens/Login';
 import { Cadastro } from './src/screens/Cadastro';
 import { Carrinho } from './src/screens/Carrinho';
@@ -70,7 +71,8 @@ function Root() {
         <Stack.Screen name="ConfigurarWebhook" component={ConfigurarWebhook} options={{ title: 'Webhooks' }} />
         <Stack.Screen name="Reembolso" component={Reembolso} options={{ title: 'Reembolso' }} />
       </Stack.Group> : <Stack.Group navigationKey="public">
-        <Stack.Screen name="Login" component={Login} options={{ title: 'NAIKE', headerBackVisible: false }} />
+        <Stack.Screen name="BoasVindas" component={BoasVindas} options={{ headerShown: false }} />
+        <Stack.Screen name="Login" component={Login} options={{ title: 'NAIKE' }} />
         <Stack.Screen name="Cadastro" component={Cadastro} options={{ title: 'Sua nova conta' }} />
         <Stack.Screen name="HomePublica" component={Home} options={{ title: 'Coleção Naike' }} />
       </Stack.Group>}
