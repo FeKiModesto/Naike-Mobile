@@ -1,12 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-import api from '../services/api';
-import { Product, ApiError, CriarProdutoVariavelInput } from '../types';
-
+import { useAction } from './useAction';
+import { catalogService } from '../services/catalogService';
+import { keys, queryClient } from '../lib/queryClient';
 export function useProdutoVariavel() {
-  return useMutation<Product, ApiError, CriarProdutoVariavelInput>({
-    mutationFn: async (dados) => {
-      const response = await api.post('/products', dados);
-      return response.data;
-    },
-  });
+  return useAction({ mutationFn: catalogService.create, onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.products }) });
 }

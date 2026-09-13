@@ -1,23 +1,11 @@
-import { useQuery } from '@tanstack/react-query';
-import api from '../services/api';
-import { Product, PaginatedResponse, ApiError } from '../types';
-
-export function useProdutos(page: number = 1, search: string = '') {
-  return useQuery<PaginatedResponse<Product>, ApiError>({
-    queryKey: ['produtos', page, search],
-    queryFn: async () => {
-      console.log('🔵 Executando queryFn');
-      try {
-        const response = await api.get('/products', {
-          params: { page, pageSize: 10, search },
-        });
-        console.log('🔵 Resposta recebida', response.data);
-        return response.data;
-      } catch (error) {
-        console.error('🔴 Erro na requisição:', error);
-        throw error;
-      }
-    },
-    staleTime: 1000 * 60 * 5,
-  });
+import { useInfiniteQuery, useQuery } from '@tanstack/react-query';
+import { catalogService } from '../services/catalogService';
+import { keys } from '../lib/queryClient';
+export function useProdutos(search = '', categoryId?: string) {
+  return useInfiniteQuery({ queryKey: [...keys.products, 'list', search, categoryId], initialPageParam: 1,
+    queryFn: ({ pageParam, signal }) => catalogService.list(pageParam, search, categoryId, signal),
+    getNextPageParam: last => last.page * last.pageSize < last.total ? last.page + 1 : undefined });
+}
+export function useCategorias() {
+  return useQuery({ queryKey: ['categories'], queryFn: ({ signal }) => catalogService.categories(signal) });
 }

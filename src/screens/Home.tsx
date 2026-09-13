@@ -1,142 +1,59 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TextInput, ActivityIndicator, RefreshControl, Button, StyleSheet, TouchableOpacity } from 'react-native';
-import { useProdutos } from '../hooks/useProdutos';
-
-export function Home({ navigation }: any) {
-  console.log('🔵 Tela Home renderizada');
-
-  const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
-  const { data, isLoading, error, refetch, isFetching } = useProdutos(page, search);
-
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#050061" />
-        <Text>Carregando produtos...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Erro: {error.message}</Text>
-        <Button title="Tentar novamente" onPress={() => refetch()} />
-      </View>
-    );
-  }
-
-  if (!data?.data.length) {
-    return (
-      <View style={styles.centered}>
-        <Text>Nenhum produto encontrado.</Text>
-      </View>
-    );
-  }
-
-  return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Naike</Text>
-      </View>
-
-      <TextInput
-        style={styles.searchInput}
-        placeholder="Buscar produtos..."
-        placeholderTextColor="#999"
-        value={search}
-        onChangeText={setSearch}
-        onSubmitEditing={() => setPage(1)}
-      />
-
-      {/* Ações rápidas */}
-      <View style={styles.acoesContainer}>
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('ProdutoVariavel')}
-        >
-          <Text style={styles.acaoBtnTexto}>+ Produto variável</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('Estoque')}
-        >
-          <Text style={styles.acaoBtnTexto}>📦 Gerenciar estoque</Text>
-        </TouchableOpacity>
-      </View>
-
-      <View style={styles.acoesContainer}>
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('CadastroCliente')}
-        >
-          <Text style={styles.acaoBtnTexto}>👤 Cadastrar cliente</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('ConfigurarWebhook')}
-        >
-          <Text style={styles.acaoBtnTexto}>🔗 Configurar webhook</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('CotacaoFrete')}
-        >
-          <Text style={styles.acaoBtnTexto}>🚚 Cotar frete</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={styles.acaoBtn}
-          onPress={() => navigation.navigate('Pagamento')}
-        >
-          <Text style={styles.acaoBtnTexto}>💳 Pagamento</Text>
-        </TouchableOpacity>
-      </View>
-
-      <FlatList
-        data={data.data}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TouchableOpacity onPress={() => navigation.navigate('Detalhe', { id: item.id })}>
-            <View style={styles.card}>
-              <Text style={styles.productName}>{item.name}</Text>
-              <Text>{item.description?.slice(0, 80)}...</Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        refreshControl={
-          <RefreshControl refreshing={isFetching} onRefresh={() => refetch()} />
-        }
-        onEndReached={() => {
-          if (data.page < Math.ceil(data.total / data.pageSize)) {
-            setPage(page + 1);
-          }
-        }}
-      />
-    </View>
-  );
+import React, { useEffect, useState } from 'react';
+import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { useNavigation, type NavigationProp } from '@react-navigation/native';
+import { useProdutos, useCategorias } from '../hooks/useProdutos';
+import { Button, Chip, Field, Notice, ProductImage, State } from '../components/UI';
+import { colors, ui } from '../theme';
+import { money } from '../utils/validation';
+import type { RootStackParamList } from '../navigation/types';
+export function Home() {
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const [search, setSearch] = useState(''); const [term, setTerm] = useState(''); const [category, setCategory] = useState<string>();
+  useEffect(() => { const timer = setTimeout(() => setTerm(search.trim()), 350); return () => clearTimeout(timer); }, [search]);
+  const products = useProdutos(term, category); const categories = useCategorias();
+  const all = products.data?.pages.flatMap(page => page.data) ?? [];
+  const { width } = useWindowDimensions(); const columns = width >= 760 ? 3 : 2;
+  return <View style={{ flex: 1, backgroundColor: colors.paper }}>
+    <FlatList key={columns} numColumns={columns} data={all} keyExtractor={item => item.id}
+      contentContainerStyle={{ padding: 20, gap: 18, width: '100%', maxWidth: 1000, alignSelf: 'center', flexGrow: 1 }}
+      columnWrapperStyle={{ gap: 14 }} keyboardShouldPersistTaps="handled"
+      refreshControl={<RefreshControl refreshing={products.isRefetching} onRefresh={() => { void products.refetch(); void categories.refetch(); }} tintColor={colors.navy} />}
+      ListHeaderComponent={<View style={{ gap: 22, marginBottom: 8 }}>
+        <View style={ui.between}><View><Text style={ui.eyebrow}>VISTA O SEU RITMO</Text><Text style={ui.title}>Encontre seu estilo.</Text></View></View>
+        <View style={{ backgroundColor: colors.navy, borderRadius: 24, padding: 24, minHeight: 215, overflow: 'hidden', gap: 14 }}>
+          <View style={{ position: 'absolute', right: -55, top: -45, height: 240, width: 240, borderRadius: 120, borderWidth: 38, borderColor: '#1C1974' }} />
+          <Text style={{ color: colors.lime, fontWeight: '700', fontSize: 11, letterSpacing: 2 }}>O ESSENCIAL É SER VOCÊ</Text>
+          <Text style={{ color: colors.white, fontWeight: '800', fontSize: 35, lineHeight: 39, maxWidth: 260 }}>Da rua.{ '\n' }Para a sua vida.</Text>
+          <Text style={{ color: '#DCDEF1', fontSize: 15, maxWidth: 250 }}>Explore roupas e tênis. Encontre o que combina com você.</Text>
+        </View>
+        <Field label="O que você procura?" placeholder="Busque tênis, camisetas…" value={search} onChangeText={setSearch} returnKeyType="search" />
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+          <Chip title="Todos" selected={!category} onPress={() => setCategory(undefined)} />
+          {categories.data?.map(item => <Chip key={item.id} title={item.name} selected={item.id === category} onPress={() => setCategory(item.id)} />)}
+        </ScrollView>
+        {categories.error && <Notice text="As categorias não carregaram. Você ainda pode usar a busca." />}
+        <View style={ui.between}><Text style={ui.heading}>{term ? 'Suas descobertas' : 'Nossa coleção'}</Text>
+          {products.data && <Text style={ui.muted}>{products.data.pages[0].total} itens</Text>}</View>
+      </View>}
+      renderItem={({ item }) => {
+        const price = item.variants.length ? Math.min(...item.variants.map(v => v.price)) : null;
+        return <Pressable accessibilityRole="button" accessibilityLabel={'Ver ' + item.name}
+          onPress={() => navigation.navigate('Detalhe', { id: item.id })}
+          style={({ pressed }) => ({ flex: 1, maxWidth: ((Math.min(width, 1000) - 40 - 14 * (columns - 1)) / columns), gap: 9, opacity: pressed ? .7 : 1 })}>
+          <ProductImage uri={item.images[0]} name={item.name} height={width < 400 ? 155 : 195} />
+          <Text style={{ color: colors.ink, fontWeight: '700', fontSize: 15 }} numberOfLines={2}>{item.name}</Text>
+          <Text style={{ color: colors.navy, fontWeight: '800', fontSize: 16 }}>{price === null ? 'Ver disponibilidade' : money(price)}</Text>
+          <Text style={ui.muted}>{item.variants.some(v => v.stock > 0) ? 'Escolha sua variante' : 'Sem estoque'}</Text>
+        </Pressable>;
+      }}
+      ListEmptyComponent={<State loading={products.isPending} error={products.error} title="Nenhuma peça por aqui ainda"
+        text={term || category ? 'Tente outra busca ou explore todas as categorias.' : 'O catálogo da loja aparecerá aqui assim que houver produtos publicados.'}
+        action={() => { if (term || category) { setSearch(''); setCategory(undefined); } else void products.refetch(); }}
+        actionTitle={term || category ? 'Limpar filtros' : 'Atualizar coleção'} />}
+      ListFooterComponent={<View style={{ paddingVertical: 16, gap: 12 }}>
+        {!!all.length && products.error && <State error={products.error} action={() => void products.fetchNextPage()} />}
+        {products.hasNextPage && <Button title="Ver mais peças" secondary loading={products.isFetchingNextPage} onPress={() => void products.fetchNextPage()} />}
+      </View>}
+    />
+  </View>;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#f5f5f5' },
-  header: { backgroundColor: '#050061', padding: 20, alignItems: 'center' },
-  headerTitle: { color: '#fff', fontSize: 24, fontWeight: 'bold' },
-  searchInput: { margin: 10, padding: 10, backgroundColor: '#fff', borderRadius: 8, borderWidth: 1, borderColor: '#ddd' },
-  acoesContainer: { flexDirection: 'row', gap: 8, marginHorizontal: 10, marginBottom: 4 },
-  acaoBtn: {
-    flex: 1,
-    backgroundColor: '#050061',
-    borderRadius: 8,
-    padding: 12,
-    alignItems: 'center',
-  },
-  acaoBtnTexto: { color: '#fff', fontWeight: 'bold', fontSize: 13 },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { color: 'red', marginBottom: 10 },
-  card: { backgroundColor: '#fff', margin: 10, padding: 15, borderRadius: 8, shadowColor: '#000', shadowOpacity: 0.1, shadowRadius: 4 },
-  productName: { fontSize: 18, fontWeight: 'bold', color: '#050061' },
-});

@@ -1,102 +1,50 @@
-import React from 'react';
-import { View, Text, ActivityIndicator, Button, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { ScrollView, Text, View } from 'react-native';
+import { useNavigation, useRoute, type NavigationProp, type RouteProp } from '@react-navigation/native';
 import { useProduto } from '../hooks/useProduto';
-import { useState } from 'react';
-import { TouchableOpacity } from 'react-native';
 import { useAdicionarAoCarrinho } from '../hooks/useCarrinho';
+import { useFavoritar, useFavoritos } from '../hooks/useFavoritos';
 import { useAuth } from '../contexts/AuthContext';
-import { showAlert } from '../utils/alert';
-
-export function Detalhe({ route, navigation }: any) {
-  const { id } = route.params;
-  const { data, isLoading, error, refetch } = useProduto(id);
-
-  
-  const [quantidade, setQuantidade] = useState(1);
-  const { isLoggedIn } = useAuth();
-  const { mutate: adicionarAoCarrinho, isPending } = useAdicionarAoCarrinho();
-
-  if (isLoading) {
-    return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#050061" />
-        <Text>Carregando detalhes...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Erro: {error.message}</Text>
-        <Button title="Tentar novamente" onPress={() => refetch()} />
-      </View>
-    );
-  }
-
-  if (!data) {
-    return (
-      <View style={styles.centered}>
-        <Text>Produto não encontrado.</Text>
-      </View>
-    );
-  }
-
-
-function handleAdicionarAoCarrinho() {
-  if (!isLoggedIn) {
-    showAlert('Login necessário', 'Faça login para adicionar ao carrinho.', [
-      { text: 'Cancelar', style: 'cancel' },
-      { text: 'Entrar', onPress: () => navigation.navigate('Login') },
-    ]);
-    return;
-  }
-  if (!data) return; 
-  const variantId = data.variants[0]?.id;
-  if (!variantId) { showAlert('Erro', 'Produto sem variante disponível.'); return; }
-  adicionarAoCarrinho({ variantId, quantity: quantidade }, {
-    onSuccess: () => showAlert('Adicionado!', 'Item no carrinho.', [
-      { text: 'Continuar', style: 'cancel' },
-      { text: 'Ir para checkout', onPress: () => navigation.navigate('Checkout') },
-    ]),
-    onError: (e: any) => showAlert('Erro', e.message),
-  });
+import { Button, Chip, ErrorNotice, Notice, Page, ProductImage, State } from '../components/UI';
+import { colors, ui } from '../theme';
+import { money } from '../utils/validation';
+import type { RootStackParamList } from '../navigation/types';
+export function Detalhe() {
+  const { params } = useRoute<RouteProp<RootStackParamList, 'Detalhe'>>();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
+  const product = useProduto(params.id); const cart = useAdicionarAoCarrinho(); const favorites = useFavoritos(); const favorite = useFavoritar();
+  const { isLoggedIn, offline } = useAuth();
+  const [variantId, setVariantId] = useState<string>(); const [quantity, setQuantity] = useState(1); const [success, setSuccess] = useState('');
+  if (product.isPending || product.error || !product.data) return <Page><State loading={product.isPending} error={product.error} title="Produto indisponível" action={() => void product.refetch()} /></Page>;
+  const item = product.data; const variant = item.variants.find(v => v.id === variantId);
+  const isFavorite = favorites.data?.some(v => v.variantId === variantId) ?? false;
+  const pending = cart.isPending || favorite.isPending;
+  function login() { navigation.navigate('Login'); }
+  return <Page><ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+      {(item.images.length ? item.images : [undefined]).map((uri, i) => <View key={uri ?? i} style={{ width: 300 }}><ProductImage uri={uri} name={item.name} height={300} /></View>)}
+    </ScrollView>
+    <View style={ui.section}><Text style={ui.eyebrow}>FEITO PARA O SEU DIA</Text><Text style={ui.title}>{item.name}</Text>
+      <Text style={{ color: colors.navy, fontSize: 27, fontWeight: '800' }}>{variant ? money(variant.price) : item.variants.length ? 'A partir de ' + money(Math.min(...item.variants.map(v => v.price))) : 'Indisponível'}</Text>
+      <Text style={ui.body}>{item.description || 'Confira as opções disponíveis e escolha a que combina com você.'}</Text></View>
+    <Text style={ui.heading}>Escolha sua variante</Text>
+    <Text style={ui.muted}>Selecione a combinação de cor e tamanho antes de adicionar ou favoritar.</Text>
+    <View style={{ gap: 10 }}>{item.variants.map(v => <Chip key={v.id} title={(Object.entries(v.options).map(([k, value]) => k + ': ' + value).join(' · ') || v.sku) + (v.stock <= 0 ? ' · Sem estoque' : '')}
+      selected={v.id === variantId} disabled={pending} onPress={() => { setVariantId(v.id); setQuantity(1); setSuccess(''); }} />)}</View>
+    {variant && <Text style={ui.muted}>SKU {variant.sku} · {variant.stock > 0 ? variant.stock + ' disponíveis' : 'Sem estoque no momento'}</Text>}
+    <View style={ui.between}><Text style={ui.body}>Quantidade</Text><View style={ui.row}>
+      <Button title="−" secondary disabled={quantity <= 1 || pending} onPress={() => setQuantity(q => q - 1)} />
+      <Text accessibilityLabel={'Quantidade ' + quantity} style={ui.heading}>{quantity}</Text>
+      <Button title="+" secondary disabled={!variant || quantity >= variant.stock || pending} onPress={() => setQuantity(q => q + 1)} />
+    </View></View>
+    <ErrorNotice error={cart.error || favorite.error} />{success && <Notice tone="success" text={success} />}
+    {!isLoggedIn ? <Button title="Entrar para comprar" onPress={login} /> : <>
+      <Button title={variant?.stock === 0 ? 'Sem estoque' : 'Adicionar à sacola'} icon="bag-add-outline" loading={cart.isPending}
+        disabled={!variant || variant.stock < quantity || pending || offline}
+        onPress={() => variant && cart.mutate({ variantId: variant.id, quantity }, { onSuccess: () => setSuccess('Sua escolha já está na sacola.') })} />
+      <Button title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'} secondary icon={isFavorite ? 'heart' : 'heart-outline'}
+        loading={favorite.isPending} disabled={!variant || pending || favorites.isPending || !!favorites.error || offline}
+        onPress={() => variant && favorite.mutate({ variantId: variant.id, remove: isFavorite }, { onSuccess: () => setSuccess(isFavorite ? 'Variante removida dos favoritos.' : 'Variante salva nos favoritos.') })} />
+      {success && <Button title="Ir para a sacola" secondary onPress={() => navigation.navigate('Loja', { screen: 'Carrinho' })} />}
+    </>}
+  </Page>;
 }
-
-  return (
-    <View style={styles.container}>
-      <Text style={styles.name}>{data.name}</Text>
-      <Text style={styles.description}>{data.description}</Text>
-      <Text style={styles.price}>Preço: R$ {data.variants[0]?.price?.toFixed(2) ?? 'N/A'}</Text>
-      {/* Seletor de quantidade */}
-<View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 16, gap: 16 }}>
-  <TouchableOpacity onPress={() => setQuantidade(q => Math.max(1, q - 1))}>
-    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#050061' }}>−</Text>
-  </TouchableOpacity>
-  <Text style={{ fontSize: 18 }}>{quantidade}</Text>
-  <TouchableOpacity onPress={() => setQuantidade(q => q + 1)}>
-    <Text style={{ fontSize: 24, fontWeight: 'bold', color: '#050061' }}>+</Text>
-  </TouchableOpacity>
-</View>
-
-<TouchableOpacity
-  style={{ backgroundColor: '#050061', borderRadius: 8, padding: 14, alignItems: 'center', marginTop: 16 }}
-  onPress={handleAdicionarAoCarrinho}
-  disabled={isPending}
->
-  {isPending
-    ? <ActivityIndicator color="#fff" />
-    : <Text style={{ color: '#fff', fontSize: 16, fontWeight: 'bold' }}>Adicionar ao carrinho</Text>}
-</TouchableOpacity>
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: { flex: 1, padding: 20, backgroundColor: '#fff' },
-  centered: { flex: 1, justifyContent: 'center', alignItems: 'center' },
-  errorText: { color: 'red', marginBottom: 10 },
-  name: { fontSize: 24, fontWeight: 'bold', color: '#050061', marginBottom: 8 },
-  description: { fontSize: 16, marginBottom: 8 },
-  price: { fontSize: 18, fontWeight: 'bold', color: '#050061' },
-});

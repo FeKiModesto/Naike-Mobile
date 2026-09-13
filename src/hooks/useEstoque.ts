@@ -1,15 +1,6 @@
-import { useMutation } from '@tanstack/react-query';
-import api from '../services/api';
-import { EntradaEstoque, RespostaEstoque, ApiError } from '../types';
-
+import { useAction } from './useAction';
+import { groupService } from '../services/groupService';
+import { keys, queryClient } from '../lib/queryClient';
 export function useEstoque() {
-  return useMutation<RespostaEstoque, ApiError, EntradaEstoque>({
-    mutationFn: async (dados) => {
-      const response = await api.post(`/variants/${dados.variantId}/stock/receive`, {
-        quantity: dados.quantity,
-        reason: dados.reason ?? 'Entrada manual',
-      });
-      return response.data;
-    },
-  });
+  return useAction({ mutationFn: groupService.receive, onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.products }) });
 }
