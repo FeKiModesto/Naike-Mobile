@@ -35,6 +35,8 @@ yarn-error.*
 
 # Ignorar arquivo .env com dados sensíveis
 .env
+.env.*
+.artifacts/
 
 # typescript
 *.tsbuildinfo
