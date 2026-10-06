@@ -25,7 +25,13 @@ export function Detalhe() {
     </ScrollView>
     <View style={ui.section}><Text style={ui.eyebrow}>FEITO PARA O SEU DIA</Text><Text style={ui.title}>{item.name}</Text>
       <Text style={{ color: colors.navy, fontSize: 27, fontWeight: '800' }}>{variant ? money(variant.price) : item.variants.length ? 'A partir de ' + money(Math.min(...item.variants.map(v => v.price))) : 'Indisponível'}</Text>
-      <Text style={ui.body}>{item.description || 'Confira as opções disponíveis e escolha a que combina com você.'}</Text></View>
+      <Text style={ui.body}>{item.description || 'Confira as opções disponíveis e escolha a que combina com você.'}</Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+        <Text style={{ fontSize: 18, color: '#F5A623' }}>{item.rating && item.rating.count > 0 ? '★'.repeat(Math.round(item.rating.average)) + '☆'.repeat(5 - Math.round(item.rating.average)) : '☆☆☆☆☆'}</Text>
+        <Text style={ui.muted}>{item.rating && item.rating.count > 0 ? item.rating.average.toFixed(1) + ' · ' + item.rating.count + ' avaliação' + (item.rating.count !== 1 ? 'ões' : '') : 'Ainda sem avaliações'}</Text>
+      </View>
+      <Button title="Ver avaliações" secondary onPress={() => navigation.navigate('Avaliacoes', { productId: item.id, productName: item.name })} />
+    </View>
     <Text style={ui.heading}>Escolha sua variante</Text>
     <Text style={ui.muted}>Selecione a combinação de cor e tamanho antes de adicionar ou favoritar.</Text>
     <View style={{ gap: 10 }}>{item.variants.map(v => <Chip key={v.id} title={(Object.entries(v.options).map(([k, value]) => k + ': ' + value).join(' · ') || v.sku) + (v.stock <= 0 ? ' · Sem estoque' : '')}
