@@ -1,4 +1,3 @@
-/** Contratos conferidos no PDF CP4 e Swagger v1. */
 export interface Customer { id: string; name: string; email: string }
 export interface LoginInput { email: string; password: string }
 export interface LoginResponse { token: string; customer: Customer }
@@ -9,6 +8,7 @@ export interface Variant { id: string; sku: string; price: number; stock: number
 export interface Product {
   id: string; name: string; description: string; variants: Variant[];
   images: string[]; categoryId?: string; options: { name: string; values: string[] }[];
+  rating?: { average: number; count: number };
 }
 export interface PaginatedResponse<T> { data: T[]; page: number; pageSize: number; total: number }
 export interface VarianteInput { sku: string; price: number; stock: number; options: Record<string, string> }
@@ -34,3 +34,29 @@ export interface ReembolsoInput { orderId: string }
 export interface CotacaoFreteInput { cepDestino: string; orderId?: string; items?: { weightGr: number; quantity: number }[] }
 export interface ConfigurarWebhookInput { url: string; description?: string; events: string[] }
 export interface ApiError extends Error { status: number; code: string; details?: unknown }
+
+export interface Review {
+  id: string;
+  rating: number;
+  comment: string;
+  mediaIds: string[];
+  createdAt: string;
+  customer: { name: string };
+}
+
+export type CanReviewMotivo =
+  | 'NOT_PURCHASED'
+  | 'ALREADY_REVIEWED'
+  | 'REVIEW_WINDOW_EXPIRED'
+  | 'allowed';
+
+export interface CanReviewResponse {
+  canReview: boolean;
+  reason: CanReviewMotivo;
+}
+
+export interface CriarAvaliacaoInput {
+  rating: number;
+  comment: string;
+  mediaIds: string[];
+}
