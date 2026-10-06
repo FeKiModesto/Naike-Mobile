@@ -7,6 +7,8 @@ export const queryClient = new QueryClient({ defaultOptions: {
 export const keys = {
   products: ['products'] as const,
   product: (id: string) => ['products', 'detail', id] as const,
+  reviews: (productId: string) => ['products', 'detail', productId, 'reviews'] as const,
+  canReview: (productId: string) => ['products', 'detail', productId, 'can-review'] as const,
   private: (id: string) => ['private', id] as const,
   cart: (id: string) => ['private', id, 'cart'] as const,
   favorites: (id: string) => ['private', id, 'favorites'] as const,
