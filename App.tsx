@@ -12,6 +12,7 @@ import { queryClient } from './src/lib/queryClient';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { Home } from './src/screens/Home';
 import { Detalhe } from './src/screens/Detalhe';
+import { Avaliacoes } from './src/screens/Avaliacoes';
 import { BoasVindas } from './src/screens/BoasVindas';
 import { Login } from './src/screens/Login';
 import { Cadastro } from './src/screens/Cadastro';
@@ -53,7 +54,6 @@ function Loja() {
 }
 function Root() {
   const { isLoading, customer } = useAuth();
-  // A tela nativa ? trocada pelo splash React; nunca há flash do login.
   useEffect(() => { void SplashScreen.hideAsync().catch(() => undefined); }, []);
   if (isLoading) return <View style={{ flex: 1, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center', gap: 24 }}>
     <Text style={{ color: colors.white, fontSize: 46, fontWeight: '900', letterSpacing: 6 }}>NAIKE.</Text>
@@ -70,6 +70,7 @@ function Root() {
         <Stack.Screen name="Estoque" component={Estoque} options={{ title: 'Estoque' }} />
         <Stack.Screen name="ConfigurarWebhook" component={ConfigurarWebhook} options={{ title: 'Webhooks' }} />
         <Stack.Screen name="Reembolso" component={Reembolso} options={{ title: 'Reembolso' }} />
+        <Stack.Screen name="Avaliacoes" component={Avaliacoes} options={{ title: 'Avaliações' }} />
       </Stack.Group> : <Stack.Group navigationKey="public">
         <Stack.Screen name="BoasVindas" component={BoasVindas} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={Login} options={{ title: 'NAIKE' }} />
