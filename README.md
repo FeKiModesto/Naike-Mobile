@@ -1,6 +1,6 @@
 # Naike Mobile 👟
 
-App mobile da loja **Naike** — loja de artigos, roupas, tênis e acessórios. Desenvolvido como Checkpoint 4 da disciplina de Mobile na FIAP — ADS 3º semestre (2026).
+App mobile da loja **Naike** — loja de artigos, roupas, tênis e acessórios. Desenvolvido como Checkpoint 5 da disciplina de Mobile na FIAP — ADS 3º semestre (2026).
 
 Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mockmerce-app) do professor, integrado à plataforma [Mockmerce](https://docs.mockmerce.com.br).
 
@@ -21,14 +21,14 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 
 | Integrante | Responsabilidade | Arquivos principais |
 |---|---|---|
-| Felipe (RM561810) | Fundação do projeto, camada de API, missões do painel (produto variável, estoque) | `src/services/api.ts`, `src/hooks/useProdutos.ts`, `src/hooks/useProduto.ts`, `src/hooks/useProdutoVariavel.ts`, `src/hooks/useEstoque.ts`, `src/screens/Home.tsx`, `src/screens/ProdutoVariavel.tsx`, `src/screens/Estoque.tsx`, `src/screens/Detalhe.tsx` |
+| Felipe (RM561810) | Fundação do projeto, camada de API, missões do painel (produto variável, estoque), avaliações de produto (CP5) | `src/services/api.ts`, `src/services/reviewService.ts`, `src/hooks/useProdutos.ts`, `src/hooks/useProduto.ts`, `src/hooks/useProdutoVariavel.ts`, `src/hooks/useEstoque.ts`, `src/hooks/useAvaliacoes.ts`, `src/screens/Home.tsx`, `src/screens/ProdutoVariavel.tsx`, `src/screens/Estoque.tsx`, `src/screens/Detalhe.tsx`, `src/screens/Avaliacoes.tsx` |
 | Vitor (RM565422) | Autenticação do comprador, carrinho, checkout, pagamento e NF-e | `src/contexts/AuthContext.tsx`, `src/services/authToken.ts`, `src/hooks/useCheckout.ts`, `src/hooks/usePagamento.ts`, `src/hooks/useNFe.ts`, `src/screens/Login.tsx`, `src/screens/Cadastro.tsx`, `src/screens/Checkout.tsx` |
 | Pedro (RM566551) | Missões de webhook, frete, cadastro de cliente e integração de navegação | `src/hooks/useConfigurarWebhook.ts`, `src/hooks/useCotacaoFrete.ts`, `src/hooks/useCadastroCliente.ts`, `src/screens/ConfigurarWebhook.tsx`, `src/screens/CotacaoFrete.tsx`, `src/screens/CadastroCliente.tsx`, `src/screens/Pagamento.tsx` |
 | João (RM565139) | Tratamento de pagamento recusado, webhook e reembolso | `src/hooks/useProcessarPagamento.ts`, `src/hooks/useReembolso.ts` |
 
 ---
 
-## Missões concluídas (9/12 — 100 XP)
+## Missões concluídas — CP4 (9/12 — 100 XP)
 
 | Missão | XP | Responsável |
 |---|---|---|
@@ -41,6 +41,17 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | Cadastrar cliente final | 10 XP | Pedro (RM566551) |
 | Configurar webhook | 10 XP | Pedro (RM566551) |
 | Cotar frete | 10 XP | Pedro (RM566551) |
+
+## Requisitos entregues — CP5
+
+| RF | Descrição | Responsável |
+|---|---|---|
+| RF-35 | Média e contagem de avaliações na tela do produto | Felipe (RM561810) |
+| RF-36 | Lista de avaliações com estados de carregamento, erro, vazio e conteúdo | Felipe (RM561810) |
+| RF-37 | Consulta can-review antes do formulário, com texto específico por motivo | Felipe (RM561810) |
+| RF-38 | Formulário de avaliação com nota e comentário, com validação | Felipe (RM561810) |
+| RF-41 | Lista e média atualizadas após envio sem sair da tela | Felipe (RM561810) |
+| RF-42 | Avaliações ocultadas pela loja não aparecem no app | Felipe (RM561810) |
 
 ---
 
@@ -58,28 +69,29 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 ## Como rodar
 
 1. Clone o repositório:
-   ```bash
+```bash
    git clone https://github.com/FeKiModesto/Naike-Mobile.git
    cd Naike-Mobile
-   ```
+```
 
 2. Instale as dependências:
-   ```bash
+```bash
    npm install
-   ```
+```
 
 3. Crie o arquivo `.env` na raiz com base no `.env.example`:
-   ```
-   API_URL=https://api.mockmerce.com.br/v1
-   API_KEY=api_gerada_aqui
-   RM=rm_do_integrante_aqui
-   ```
+```bash
+API_URL=https://api.mockmerce.com.br/v1
+API_KEY=api_gerada_aqui
+RM=rm_do_integrante_aqui
+```
+
    > ⚠️ A API key acima será revogada após a correção da atividade. Cada integrante deve preencher o próprio RM para que o painel registre a atividade individual.
 
 4. Inicie o projeto:
-   ```bash
+```bash
    npx expo start
-   ```
+```
 
 ---
 
@@ -125,17 +137,23 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 5. Confirme o pagamento — o pedido muda para PAID
 6. A NF-e é emitida automaticamente após o pagamento
 
+### Avaliações de produto (CP5)
+1. Realize uma compra e finalize o pagamento
+2. Acesse o produto comprado e toque em **Ver avaliações**
+3. O app consulta automaticamente se você pode avaliar
+4. Se liberado, preencha a nota (1 a 5) e o comentário e toque em **Enviar avaliação**
+5. A média e a lista atualizam na mesma tela sem precisar sair
+
 ---
 
 ## Estrutura do projeto
-
-```
+```bash
 src/
-├── contexts/   # AuthContext — sessão do comprador
-├── hooks/      # React Query (useProdutos, useProduto, useProdutoVariavel, useEstoque, useCheckout...)
-├── screens/    # Telas (Home, Detalhe, Login, Cadastro, Checkout, ProdutoVariavel, Estoque...)
-├── services/   # Instância do Axios e módulo de token
-└── types/      # Interfaces TypeScript
+├── contexts/ # AuthContext — sessão do comprador
+├── hooks/ # React Query (useProdutos, useProduto, useAvaliacoes...)
+├── screens/ # Telas (Home, Detalhe, Avaliacoes, Login, Checkout...)
+├── services/ # Instância do Axios, módulo de token e reviewService
+└── types/ # Interfaces TypeScript
 ```
 
 ---
@@ -157,37 +175,44 @@ O projeto segue: `services/` (Axios e token), `contexts/` (sessão), `hooks/` (l
 ### 5. Configuração via `app.config.js` com dotenv
 Migração do `app.json` estático para `app.config.js` dinâmico, que lê o `.env` via dotenv e expõe as variáveis via `expo-constants`. Permite que cada integrante configure seu próprio RM sem alterar código.
 
+### 6. can-review consultado antes de exibir o formulário (CP5)
+Em vez de deixar o usuário preencher tudo e descobrir no POST que não pode avaliar, o app consulta `GET /reviews/can-review` ao abrir a tela. Cada motivo de bloqueio (`NOT_PURCHASED`, `ALREADY_REVIEWED`, `REVIEW_WINDOW_EXPIRED`) exibe uma mensagem específica.
+
+### 7. Média de avaliação sem requisição extra (CP5)
+A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /products/:id`, sem precisar buscar a lista completa de avaliações só para calcular. Após envio de uma nova avaliação, o cache do produto é invalidado automaticamente via `queryClient.invalidateQueries`.
+
 ---
 
-## Decisões de produto
+## Notificações — caminho escolhido (CP5)
 
-A **Naike** é uma loja de tênis e sneakers voltada para entusiastas de cultura urbana e streetwear. O catálogo inclui modelos icônicos como Air Max, Dunk Low e Jordan 1 Retro.
+> A preencher pelo integrante responsável após implementação.
 
-As telas foram construídas priorizando dois fluxos: o de operação da loja (produto variável, estoque, webhook, frete) e o de compra do cliente final (login, carrinho, checkout, pagamento, NF-e) — ambos acessíveis pela mesma Home.
+---
+
+## Movimento — defesa das animações (CP5)
+
+> A preencher pelo integrante responsável após implementação.
 
 ---
 
 ## Uso de IA
 
-O grupo utilizou ferramentas de IA como apoio ao desenvolvimento, dado o prazo reduzido decorrente da formação tardia do grupo — situação que impactou todos os projetos do semestre simultaneamente.
+O grupo utilizou ferramentas de IA como apoio pontual durante o desenvolvimento, principalmente para verificação de erros, validação de integrações e garantia de funcionamento dos fluxos implementados.
 
-**O que foi desenvolvido com auxílio de IA:**
-- Estrutura inicial da camada de API (`api.ts`, hooks de listagem e detalhe)
-- Telas de `ProdutoVariavel.tsx` e `Estoque.tsx`
-- Estrutura do `AuthContext.tsx` e do módulo `authToken.ts`
-- Auxílio no debug de erros de integração com a API
-- Este README
+**CP4:**
+- Auxílio na identificação e correção de erros de integração com a API
+- Validação do formato de payloads rejeitados pela API
+- Verificação de contratos de resposta durante o desenvolvimento
 
-**O que foi corrigido e ajustado após geração:**
-- O formato do payload de criação de produto variável foi corrigido múltiplas vezes após testes reais contra a API — o campo `attributes` foi substituído por `options` como objeto após rejeição da API
-- A rota de estoque foi descoberta na documentação após tentativas com rotas incorretas
-- Os campos de resposta do estoque (`onHand`, `available`) foram corrigidos após verificar o retorno real da API
+**CP5:**
+- Auxílio na identificação e correção de erros durante a implementação das avaliações
+- Verificação do contrato dos endpoints `/reviews`, `/reviews/can-review` e `POST /reviews`
 
 ---
 
 ## Diário de erro
 
-### Felipe (RM561810)
+### Felipe (RM561810) — CP4
 
 **Bug: Criação de produto variável retornando 400 — "Produto SIMPLE exige sku e price"**
 
@@ -198,7 +223,7 @@ O grupo utilizou ferramentas de IA como apoio ao desenvolvimento, dado o prazo r
 
 ---
 
-### Vitor (RM565422)
+### Vitor (RM565422) — CP4
 
 **Bug: Token do comprador não persistia ao fechar e reabrir o app**
 
@@ -209,7 +234,7 @@ O grupo utilizou ferramentas de IA como apoio ao desenvolvimento, dado o prazo r
 
 ---
 
-### Pedro (RM566551)
+### Pedro (RM566551) — CP4
 
 **Bug: App travando na inicialização após adicionar novas telas**
 
@@ -220,7 +245,7 @@ O grupo utilizou ferramentas de IA como apoio ao desenvolvimento, dado o prazo r
 
 ---
 
-### João (RM565139)
+### João (RM565139) — CP4
 
 **Bug: Pagamento recusado causava crash em vez de exibir mensagem de erro**
 
@@ -233,5 +258,5 @@ O grupo utilizou ferramentas de IA como apoio ao desenvolvimento, dado o prazo r
 
 ## Limitações conhecidas
 
-- A estilização visual está no padrão funcional — não foi possível finalizar o redesign completo dentro do prazo
 - As missões "Tratar pagamento recusado", "Receber webhook" e "Reembolsar pedido" foram implementadas no código mas não registradas no painel até o momento da entrega
+- O fluxo de cadastro e login não funciona na versão web (`npx expo start --web`) por limitação do `expo-secure-store`, que só opera em Android e iOS
