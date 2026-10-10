@@ -20,8 +20,11 @@ export function productFromResponse(value: unknown): Product {
   // Imagens opcionais: só utiliza URLs presentes na resposta, nunca inventa uma foto do produto.
   const images = Array.isArray(value.images) ? value.images.flatMap(i => typeof i === 'string' ? [i] : isRecord(i) && typeof i.url === 'string' ? [i.url] : []) : [];
   const optionNames = [...new Set(variants.flatMap(v => Object.keys(v.options)))];
+  const rating = isRecord(value.rating) && typeof value.rating.average === 'number' && typeof value.rating.count === 'number'
+  ? { average: value.rating.average, count: value.rating.count }
+  : undefined;
   return { id: value.id, name: value.name, description: typeof value.description === 'string' ? value.description : '',
-    variants, images, categoryId: typeof value.categoryId === 'string' ? value.categoryId : undefined,
+    variants, images, rating, categoryId: typeof value.categoryId === 'string' ? value.categoryId : undefined,
     options: optionNames.map(name => ({ name, values: [...new Set(variants.map(v => v.options[name]).filter(Boolean))] })) };
 }
 export const catalogService = {
