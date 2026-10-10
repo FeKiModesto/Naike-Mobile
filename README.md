@@ -52,6 +52,14 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-38 | Formulário de avaliação com nota e comentário, com validação | Felipe (RM561810) |
 | RF-41 | Lista e média atualizadas após envio sem sair da tela | Felipe (RM561810) |
 | RF-42 | Avaliações ocultadas pela loja não aparecem no app | Felipe (RM561810) |
+| RF-39 | Anexar foto da galeria via POST /uploads (multipart) e usar o mediaId na avaliação | Vitor (RM565422) |
+| RF-40 | Galeria negada: formulário segue funcionando e a tela explica o que se perdeu | Vitor (RM565422) |
+| RF-43 | Localização com três desfechos: concedida, negada e concedida sem posição | Vitor (RM565422) |
+| RF-44 | Lista de pontos de retirada ordenada por distância, com a distância na tela | Vitor (RM565422) |
+| RF-45 | Sem posição: a lista continua, sem ordenar, com o motivo e caminho para tentar de novo | Vitor (RM565422) |
+| RF-47 | O checkout permite escolher retirada num ponto, e o pedido criado reflete a escolha | Vitor (RM565422) |
+| RF-48 | A tela de retirada trata carregando, vazio e erro | Vitor (RM565422) |
+
 
 ---
 
