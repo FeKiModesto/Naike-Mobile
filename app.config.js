@@ -23,12 +23,19 @@ export default {
     web: {
       favicon: "./assets/naike-icon.png"
     },
-    plugins: ["expo-secure-store", ["expo-splash-screen", {
-      image: "./assets/naike-splash.png",
-      imageWidth: 180,
-      resizeMode: "contain",
-      backgroundColor: "#050061"
-    }]],
+    plugins: [ "expo-secure-store",
+  ["expo-splash-screen", {
+    image: "./assets/naike-splash.png",
+    imageWidth: 180,
+    resizeMode: "contain",
+    backgroundColor: "#050061"
+  }],
+  ["expo-image-picker", {
+    photosPermission: "A Naike usa suas fotos para anexar às avaliações."
+  }],
+  ["expo-location", {
+    locationWhenInUsePermission: "A Naike usa sua localização para mostrar os pontos de retirada mais próximos."
+  }]],
     extra: {
       apiBaseUrl: process.env.API_BASE_URL,
       apiKey: process.env.API_KEY,
