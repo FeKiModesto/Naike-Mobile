@@ -30,6 +30,7 @@ import { ConfigurarWebhook } from './src/screens/ConfigurarWebhook';
 import { Reembolso } from './src/screens/Reembolso';
 import { colors } from './src/theme';
 import { useCarrinho } from './src/hooks/useCarrinho';
+import { Retirada } from './src/screens/Retirada';
 import type { RootStackParamList, TabParams } from './src/navigation/types';
 void SplashScreen.preventAutoHideAsync().catch(() => undefined);
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -58,7 +59,7 @@ function Root() {
   if (isLoading) return <View style={{ flex: 1, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center', gap: 24 }}>
     <Text style={{ color: colors.white, fontSize: 46, fontWeight: '900', letterSpacing: 6 }}>NAIKE.</Text>
     <ActivityIndicator color={colors.lime} /><Text style={{ color: colors.white }}>Preparando seu próximo passo…</Text></View>;
-  return <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: colors.navy, background: colors.paper, card: colors.white, text: colors.ink, border: colors.line } }}>
+    return <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: colors.navy, background: colors.paper, card: colors.white, text: colors.ink, border: colors.line } }}>
     <Stack.Navigator screenOptions={{ headerTintColor: colors.navy, headerShadowVisible: false, headerTitleStyle: { fontWeight: '700' }, contentStyle: { backgroundColor: colors.paper } }}>
       {customer ? <Stack.Group navigationKey={customer.id}>
         <Stack.Screen name="Loja" component={Loja} options={{ headerShown: false }} />
@@ -71,6 +72,7 @@ function Root() {
         <Stack.Screen name="ConfigurarWebhook" component={ConfigurarWebhook} options={{ title: 'Webhooks' }} />
         <Stack.Screen name="Reembolso" component={Reembolso} options={{ title: 'Reembolso' }} />
         <Stack.Screen name="Avaliacoes" component={Avaliacoes} options={{ title: 'Avaliações' }} />
+        <Stack.Screen name="Retirada" component={Retirada} options={{ title: 'Pontos de retirada' }} />
       </Stack.Group> : <Stack.Group navigationKey="public">
         <Stack.Screen name="BoasVindas" component={BoasVindas} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={Login} options={{ title: 'NAIKE' }} />

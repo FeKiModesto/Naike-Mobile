@@ -15,6 +15,7 @@ export function Perfil() {
       <Text style={ui.heading}>{customer?.name}</Text><Text style={ui.muted}>{customer?.email}</Text></View>
     {offline && <><Notice text="Sessão em modo offline. Seus favoritos salvos continuam disponíveis." /><Button title="Reconectar" secondary onPress={retrySession} /></>}
     <Button title="Meus pedidos" secondary icon="receipt-outline" onPress={() => navigation.navigate('Loja', { screen: 'Pedidos' })} />
+    <Button title="Pontos de retirada" secondary icon="storefront-outline" onPress={() => navigation.navigate('Retirada')} />
     <Button title="Ferramentas do grupo" secondary icon="construct-outline" onPress={() => navigation.navigate('Ferramentas')} />
     <Button title="Sair da conta" icon="log-out-outline" loading={exit.isPending} onPress={() => exit.mutate(undefined)} />
     <Text style={[ui.muted, { textAlign: 'center' }]}>NAIKE · Vista o seu ritmo.</Text>
