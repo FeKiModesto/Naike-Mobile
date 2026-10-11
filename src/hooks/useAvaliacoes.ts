@@ -1,8 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { useAction } from './useAction';
-import { reviewService } from '../services/reviewService';
-import { keys, queryClient } from '../lib/queryClient';
-import type { CriarAvaliacaoInput } from '../types';
+import { useQuery } from "@tanstack/react-query";
+import { useAction } from "./useAction";
+import { reviewService } from "../services/reviewService";
+import { uploadService } from "../services/uploadService";
+import { keys, queryClient } from "../lib/queryClient";
+import type { EnviarAvaliacaoInput } from "../types";
 
 export function useAvaliacoes(productId: string) {
   return useQuery({
@@ -22,11 +23,17 @@ export function useCanReview(productId: string) {
 
 export function useEnviarAvaliacao(productId: string) {
   return useAction({
-    mutationFn: (input: CriarAvaliacaoInput) => reviewService.create(productId, input),
+    mutationFn: async ({ rating, comment, fotos }: EnviarAvaliacaoInput) => {
+      const mediaIds: string[] = [];
+      for (const foto of fotos) mediaIds.push(await uploadService.enviar(foto));
+      await reviewService.create(productId, { rating, comment, mediaIds });
+    },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: keys.reviews(productId) });
       void queryClient.invalidateQueries({ queryKey: keys.product(productId) });
-      void queryClient.invalidateQueries({ queryKey: keys.canReview(productId) });
+      void queryClient.invalidateQueries({
+        queryKey: keys.canReview(productId),
+      });
     },
   });
 }

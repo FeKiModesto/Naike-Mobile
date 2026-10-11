@@ -4,8 +4,12 @@ import { useRoute, type RouteProp } from '@react-navigation/native';
 import { useAvaliacoes, useCanReview, useEnviarAvaliacao } from '../hooks/useAvaliacoes';
 import { Button, ErrorNotice, Field, Notice, Page, State } from '../components/UI';
 import { colors, ui } from '../theme';
+import { FotosAvaliacao } from '../components/FotosAvaliacao';
+import { useFotosAvaliacao } from '../hooks/useFotosAvaliacao';
+import { dateLabel } from '../utils/validation';
 import type { RootStackParamList } from '../navigation/types';
 import type { CanReviewMotivo } from '../types';
+import { uploadImageSource } from '../services/api';
 
 function motivoTexto(motivo: CanReviewMotivo): string {
   switch (motivo) {
@@ -36,6 +40,7 @@ export function Avaliacoes() {
   const avaliacoes = useAvaliacoes(productId);
   const canReview = useCanReview(productId);
   const enviar = useEnviarAvaliacao(productId);
+  const galeria = useFotosAvaliacao();
   const [nota, setNota] = useState(0);
   const [comentario, setComentario] = useState('');
   const [erroForm, setErroForm] = useState('');
@@ -45,9 +50,9 @@ export function Avaliacoes() {
     if (comentario.trim().length < 5) { setErroForm('Escreva um comentário com pelo menos 5 caracteres.'); return; }
     setErroForm('');
     enviar.mutate(
-      { rating: nota, comment: comentario.trim(), mediaIds: [] },
-      { onSuccess: () => { setNota(0); setComentario(''); setEnviado(true); } },
-    );
+  { rating: nota, comment: comentario.trim(), fotos: galeria.fotos },
+  { onSuccess: () => { setNota(0); setComentario(''); galeria.limpar(); setEnviado(true); } },
+);
   }
   const lista = avaliacoes.data ?? [];
   return <Page>
@@ -57,6 +62,7 @@ export function Avaliacoes() {
       <Text style={ui.heading}>Deixe sua avaliação</Text>
       <Estrelas valor={nota} onChange={setNota} desabilitado={enviar.isPending} />
       <Field label="Comentário" multiline value={comentario} onChangeText={setComentario} placeholder="O que você achou do produto?" editable={!enviar.isPending} />
+      <FotosAvaliacao galeria={galeria} desabilitado={enviar.isPending} />
       {erroForm ? <Notice text={erroForm} tone="error" /> : null}
       {enviado && <Notice text="Avaliação enviada com sucesso! Obrigado." tone="success" />}
       <ErrorNotice error={enviar.error} />
@@ -72,10 +78,13 @@ export function Avaliacoes() {
         <Text style={ui.body}>{r.comment}</Text>
         {r.mediaIds.length > 0 && <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ flexDirection: 'row', gap: 8 }}>
-            {r.mediaIds.map(mid => <Image key={mid} source={{ uri: `https://api.mockmerce.com.br/v1/uploads/${mid}` }} style={{ width: 80, height: 80, borderRadius: 10 }} resizeMode="cover" accessibilityLabel="Foto da avaliação" />)}
+            {r.mediaIds.map(mid => <Image key={mid}
+  source={/^https?:\/\//.test(mid) ? { uri: mid } : uploadImageSource(mid)}
+  style={{ width: 80, height: 80, borderRadius: 10, backgroundColor: colors.line }} resizeMode="cover" accessibilityLabel="Foto da avaliação"
+  onError={e => console.log('FOTO FALHOU', mid, e.nativeEvent.error)} />)}
           </View>
         </ScrollView>}
-        <Text style={ui.muted}>{new Date(r.createdAt).toLocaleDateString('pt-BR')}</Text>
+      <Text style={ui.muted}>{dateLabel(r.createdAt)}</Text>    
       </View>)}
     </View>}
   </Page>;
