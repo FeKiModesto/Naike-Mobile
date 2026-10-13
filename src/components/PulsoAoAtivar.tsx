@@ -1,0 +1,31 @@
+import React, { useEffect, useRef } from 'react';
+import Animated, { useAnimatedStyle, useSharedValue, withSequence } from 'react-native-reanimated';
+import { useMovimento } from '../hooks/useMovimento';
+import { DURACAO, ESCALA_PULO, OPACIDADE_PISCADA, mola, tempo } from '../lib/animacoes';
+
+/**
+ * Confirmação visual de ações sem navegação (RF-50): quando `ativo` passa a true, o
+ * conteúdo dá um pulo. Reage ao estado, não ao toque: se a gravação falhar e o estado
+ * voltar, a animação não terá dito que deu certo. Só anima ao ativar, não ao desativar.
+ * Em "reduzir movimento" o pulo vira uma piscada de opacidade, então o feedback continua.
+ */
+export function PulsoAoAtivar({ ativo, children }: { ativo: boolean; children: React.ReactNode }) {
+  const modo = useMovimento();
+  const escala = useSharedValue(1);
+  const opacidade = useSharedValue(1);
+  const anterior = useRef(ativo);
+
+  useEffect(() => {
+    const ativou = ativo && !anterior.current;
+    anterior.current = ativo;
+    if (!ativou) return;
+    if (modo === 'completo') {
+      escala.value = withSequence(tempo(modo, ESCALA_PULO, { duration: DURACAO.rapida }), mola(modo, 1));
+    } else if (modo === 'reduzido') {
+      opacidade.value = withSequence(tempo(modo, OPACIDADE_PISCADA, { duration: DURACAO.rapida }), tempo(modo, 1, { duration: DURACAO.media }));
+    }
+  }, [ativo, modo, escala, opacidade]);
+
+  const estilo = useAnimatedStyle(() => ({ transform: [{ scale: escala.value }], opacity: opacidade.value }));
+  return <Animated.View style={estilo}>{children}</Animated.View>;
+}
