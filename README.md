@@ -59,6 +59,14 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-45 | Sem posição: a lista continua, sem ordenar, com o motivo e caminho para tentar de novo | Vitor (RM565422) |
 | RF-47 | O checkout permite escolher retirada num ponto, e o pedido criado reflete a escolha | Vitor (RM565422) |
 | RF-48 | A tela de retirada trata carregando, vazio e erro | Vitor (RM565422) |
+| RF-49 | Controles principais respondem ao toque com mola (`Pressionavel`, usado em botões, chips, cards e estrelas) | Pedro (RM566551) |
+| RF-50 | Favoritar tem confirmação visual: o coração pulsa ao ativar (`PulsoAoAtivar`) e os avisos entram com fade | Pedro (RM566551) |
+| RF-51 | Grade de produtos entra escalonada, com teto de 300 ms no atraso | Pedro (RM566551) |
+| RF-52 | Itens removidos de Favoritos e Carrinho saem animados e os demais se acomodam (`layout`) | Pedro (RM566551) |
+| RF-53 | Carregamento com sinal de vida: texto pulsante junto do spinner | Pedro (RM566551) |
+| RF-54 | "Reduzir movimento" do sistema: troca deslocamento/escala por opacidade, sem tirar o feedback | Pedro (RM566551) |
+| RF-55 | `ANIMACOES_ATIVAS` em `src/lib/animacoes.ts` desliga tudo; defesa na seção "Movimento" | Pedro (RM566551) |
+| RF-62 | Durações, molas e escalas vêm de um arquivo único (`src/lib/animacoes.ts`) | Pedro (RM566551) |
 
 
 ---
@@ -71,6 +79,7 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 - TanStack Query (React Query)
 - Axios
 - Expo Secure Store
+- React Native Reanimated 4 + Worklets (movimento)
 
 ---
 
@@ -199,7 +208,32 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 
 ## Movimento — defesa das animações (CP5)
 
-> A preencher pelo integrante responsável após implementação.
+**Onde fica tudo:** `src/lib/animacoes.ts` guarda durações (150/250/400 ms), molas, escalas e o teto do escalonamento. Nenhum componente escolhe número próprio. O modo atual vem de `useMovimento()`, e a lógica de animação está em quatro componentes: `Pressionavel`, `PulsoAoAtivar`, `Pulsante` e `ItemDeLista`. As telas só os usam.
+
+**Critério:** se o dedo causou o movimento, usa mola (`withSpring`). Se o movimento só informa (entrou, saiu, carregou), usa tempo (`withTiming`). Movimento sem função de informar ou confirmar foi cortado.
+
+**Três modos**
+
+| Modo | Quando | O que acontece |
+|---|---|---|
+| completo | padrão | escala com mola, pulo, entrada deslizando, saída e acomodação |
+| reduzido | "Reduzir movimento" ligado no sistema | some o deslocamento e a escala. O toque escurece, o pulo vira piscada de opacidade, listas só fazem fade. O feedback continua |
+| desligado | `ANIMACOES_ATIVAS = false` | nada anima. Os valores mudam no mesmo frame e o app segue utilizável |
+
+**Mantidas e por quê**
+- Toque com mola em botões, chips, cards e estrelas: sem isso o usuário não sabe se o toque pegou e toca de novo (num botão de pagar, isso é pedido duplicado).
+- Pulo do coração ao favoritar: favoritar não navega nem abre alerta, então essa é a única prova de que funcionou. Só anima ao ativar e reage ao estado, não ao toque, para não confirmar uma gravação que falhou.
+- Fade dos avisos (`Notice`): a mensagem de sucesso/erro não surge do nada.
+- Entrada escalonada da grade, com teto de 300 ms: guia a leitura e não faz o item 40 esperar 1,6 s.
+- Saída animada + `layout` em Favoritos e Carrinho: sem o `layout`, os itens que ficam pulam de posição e a saída se perde.
+- Pulso do texto de carregamento: diferencia "ainda trabalhando" de "travou". Fica só no modo completo, porque o spinner nativo já sinaliza nos outros.
+
+**Cortadas**
+- Animação nas transições de tela (já existe a nativa do React Navigation).
+- Pulo ao desfavoritar e entrada animada ao trocar filtro/busca na Home: remover não merece comemoração, e a grade deslizando a cada letra digitada atrapalha.
+- Animações decorativas, sem informação (banner, logo, ícones parados).
+
+**Detalhe técnico:** o app usa `<ReducedMotionConfig mode={ReduceMotion.Never} />`. Sem ele, o Reanimated pula todas as animações quando o sistema pede menos movimento, e o feedback sumiria. Assim o app decide o que substituir. Não há plugin do Reanimated no `babel.config.js`: no SDK 54 o `babel-preset-expo` já cuida disso.
 
 ---
 
@@ -213,6 +247,7 @@ O grupo utilizou ferramentas de IA como apoio pontual durante o desenvolvimento,
 - Verificação de contratos de resposta durante o desenvolvimento
 
 **CP5:**
+- Auxílio na implementação do movimento (Reanimated 4): vocabulário em `src/lib/animacoes.ts`, componentes `Pressionavel`, `PulsoAoAtivar`, `Pulsante` e `ItemDeLista` e o modo "Reduzir movimento". A estrutura se baseou no repositório de referência da turma (`mockmerce-app`, semana 07). O que mudou depois de gerar: o modo `reduzido` (a referência não trata o "Reduzir movimento"), a constante `ANIMACOES_ATIVAS`, o `acomodar` das listas e a defesa escrita acima.
 - Auxílio na identificação e correção de erros durante a implementação das avaliações
 - Verificação do contrato dos endpoints `/reviews`, `/reviews/can-review` e `POST /reviews`
 
