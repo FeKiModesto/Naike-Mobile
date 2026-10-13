@@ -202,3 +202,10 @@ export interface EnviarAvaliacaoInput {
 export interface CheckoutInput {
   pickupPointId?: string;
 }
+export interface MensagemPush {
+  id: string;
+  customerId?: string;
+  title?: string;
+  body?: string;
+  data: Record<string, string>;
+}
