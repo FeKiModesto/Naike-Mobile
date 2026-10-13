@@ -1,7 +1,13 @@
 import React, { useRef, useState } from 'react';
-import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
+import { ActivityIndicator, Image, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, View, type TextInputProps, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import Animated from 'react-native-reanimated';
+import { Pressionavel } from './Pressionavel';
+import { PulsoAoAtivar } from './PulsoAoAtivar';
+import { Pulsante } from './Pulsante';
+import { useMovimento } from '../hooks/useMovimento';
+import { entradaSuave } from '../lib/animacoes';
 import { colors, ui } from '../theme';
 import { errorMessage } from '../utils/errors';
 export function Page({ children, style }: { children: React.ReactNode; style?: ViewStyle }) {
@@ -11,13 +17,14 @@ export function Page({ children, style }: { children: React.ReactNode; style?: V
     </KeyboardAvoidingView>
   </SafeAreaView>;
 }
-export function Button({ title, onPress, loading, disabled, secondary, icon }: { title: string; onPress: () => void; loading?: boolean; disabled?: boolean; secondary?: boolean; icon?: keyof typeof Ionicons.glyphMap }) {
+export function Button({ title, onPress, loading, disabled, secondary, icon, pulsoIcone }: { title: string; onPress: () => void; loading?: boolean; disabled?: boolean; secondary?: boolean; icon?: keyof typeof Ionicons.glyphMap; pulsoIcone?: boolean }) {
   const blocked = !!loading || !!disabled;
-  return <Pressable accessibilityRole="button" accessibilityLabel={title} accessibilityState={{ disabled: blocked, busy: !!loading }}
-    disabled={blocked} onPress={onPress} style={({ pressed }) => [styles.button, { backgroundColor: secondary ? colors.white : colors.navy, borderColor: colors.navy, opacity: blocked ? .5 : pressed ? .8 : 1 }]}>
-    {loading ? <ActivityIndicator color={secondary ? colors.navy : colors.white} /> : icon ? <Ionicons name={icon} size={20} color={secondary ? colors.navy : colors.white} /> : null}
+  const iconeNode = icon ? <Ionicons name={icon} size={20} color={secondary ? colors.navy : colors.white} /> : null;
+  return <Pressionavel accessibilityRole="button" accessibilityLabel={title} accessibilityState={{ disabled: blocked, busy: !!loading }}
+    disabled={blocked} semAnimacao={blocked} onPress={onPress} style={[styles.button, { backgroundColor: secondary ? colors.white : colors.navy, borderColor: colors.navy, opacity: blocked ? .5 : 1 }]}>
+    {loading ? <ActivityIndicator color={secondary ? colors.navy : colors.white} /> : pulsoIcone === undefined ? iconeNode : <PulsoAoAtivar ativo={pulsoIcone}>{iconeNode}</PulsoAoAtivar>}
     <Text style={{ color: secondary ? colors.navy : colors.white, fontWeight: '700', fontSize: 15, textAlign: 'center', flexShrink: 1 }}>{title}</Text>
-  </Pressable>;
+  </Pressionavel>;
 }
 export function Field({ label, error, ...props }: TextInputProps & { label: string; error?: string }) {
   return <View style={{ gap: 8 }}>
@@ -27,10 +34,11 @@ export function Field({ label, error, ...props }: TextInputProps & { label: stri
   </View>;
 }
 export function Notice({ text, tone = 'info' }: { text: string; tone?: 'info' | 'error' | 'success' }) {
+  const modo = useMovimento();
   const color = tone === 'error' ? colors.danger : tone === 'success' ? colors.success : colors.navy;
-  return <View accessibilityLiveRegion="polite" style={{ borderLeftWidth: 3, borderColor: color, backgroundColor: colors.white, borderRadius: 8, padding: 14 }}>
+  return <Animated.View {...entradaSuave(modo)} accessibilityLiveRegion="polite" style={{ borderLeftWidth: 3, borderColor: color, backgroundColor: colors.white, borderRadius: 8, padding: 14 }}>
     <Text style={{ fontSize: 14, lineHeight: 21, color }}>{text}</Text>
-  </View>;
+  </Animated.View>;
 }
 export function ErrorNotice({ error }: { error: unknown }) { return error ? <Notice text={errorMessage(error)} tone="error" /> : null; }
 export function State({ loading, error, title, text, action, actionTitle = 'Tentar novamente', icon = 'bag-outline' }: {
@@ -38,17 +46,18 @@ export function State({ loading, error, title, text, action, actionTitle = 'Tent
 }) {
   return <View style={{ padding: 28, gap: 16, alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: 240 }}>
     {loading ? <ActivityIndicator size="large" color={colors.navy} /> : <Ionicons name={error ? 'cloud-offline-outline' : icon} size={42} color={colors.navy} />}
-    <Text style={[ui.heading, { textAlign: 'center' }]}>{loading ? 'Só um instante…' : error ? 'Não conseguimos carregar' : title}</Text>
+    {loading ? <Pulsante><Text style={[ui.heading, { textAlign: 'center' }]}>Só um instante…</Text></Pulsante>
+      : <Text style={[ui.heading, { textAlign: 'center' }]}>{error ? 'Não conseguimos carregar' : title}</Text>}
     <Text style={[ui.muted, { textAlign: 'center' }]}>{error ? errorMessage(error) : text}</Text>
     {!loading && action && <Button title={actionTitle} onPress={action} secondary />}
   </View>;
 }
 export function Chip({ title, selected, onPress, disabled }: { title: string; selected?: boolean; onPress: () => void; disabled?: boolean }) {
-  return <Pressable accessibilityRole="radio" accessibilityLabel={title} accessibilityState={{ selected: !!selected, disabled: !!disabled }}
-    onPress={onPress} disabled={disabled} style={{ minHeight: 44, paddingHorizontal: 17, paddingVertical: 12, justifyContent: 'center',
+  return <Pressionavel accessibilityRole="radio" accessibilityLabel={title} accessibilityState={{ selected: !!selected, disabled: !!disabled }}
+    onPress={onPress} disabled={disabled} semAnimacao={disabled} style={{ minHeight: 44, paddingHorizontal: 17, paddingVertical: 12, justifyContent: 'center',
       borderRadius: 14, borderWidth: 1, borderColor: selected ? colors.navy : colors.line, backgroundColor: selected ? colors.navy : colors.white, opacity: disabled ? .4 : 1 }}>
     <Text style={{ color: selected ? colors.white : colors.ink, fontSize: 14, fontWeight: '600' }}>{title}</Text>
-  </Pressable>;
+  </Pressionavel>;
 }
 export function ProductImage({ uri, name, height = 220 }: { uri?: string; name: string; height?: number }) {
   const [failed, setFailed] = useState(false);
