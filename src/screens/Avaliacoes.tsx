@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Image, Pressable, ScrollView, Text, View } from 'react-native';
+import { Image, ScrollView, Text, View } from 'react-native';
+import { Pressionavel } from '../components/Pressionavel';
 import { useRoute, type RouteProp } from '@react-navigation/native';
 import { useAvaliacoes, useCanReview, useEnviarAvaliacao } from '../hooks/useAvaliacoes';
 import { Button, ErrorNotice, Field, Notice, Page, State } from '../components/UI';
@@ -22,9 +23,9 @@ function motivoTexto(motivo: CanReviewMotivo): string {
 
 function Estrelas({ valor, onChange, desabilitado }: { valor: number; onChange: (n: number) => void; desabilitado: boolean }) {
   return <View style={{ flexDirection: 'row', gap: 6 }}>
-    {[1, 2, 3, 4, 5].map(n => <Pressable key={n} onPress={() => !desabilitado && onChange(n)} accessibilityLabel={`${n} estrela${n > 1 ? 's' : ''}`}>
+    {[1, 2, 3, 4, 5].map(n => <Pressionavel key={n} onPress={() => !desabilitado && onChange(n)} accessibilityLabel={`${n} estrela${n > 1 ? 's' : ''}`}>
       <Text style={{ fontSize: 32, color: n <= valor ? '#F5A623' : colors.line }}>★</Text>
-    </Pressable>)}
+    </Pressionavel>)}
   </View>;
 }
 

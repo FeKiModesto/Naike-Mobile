@@ -8,6 +8,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 import * as SplashScreen from 'expo-splash-screen';
 import { Ionicons } from '@expo/vector-icons';
+import { ReduceMotion, ReducedMotionConfig } from 'react-native-reanimated';
+import { Pulsante } from './src/components/Pulsante';
 import { queryClient } from './src/lib/queryClient';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { Home } from './src/screens/Home';
@@ -58,7 +60,7 @@ function Root() {
   useEffect(() => { void SplashScreen.hideAsync().catch(() => undefined); }, []);
   if (isLoading) return <View style={{ flex: 1, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center', gap: 24 }}>
     <Text style={{ color: colors.white, fontSize: 46, fontWeight: '900', letterSpacing: 6 }}>NAIKE.</Text>
-    <ActivityIndicator color={colors.lime} /><Text style={{ color: colors.white }}>Preparando seu próximo passo…</Text></View>;
+    <ActivityIndicator color={colors.lime} /><Pulsante><Text style={{ color: colors.white }}>Preparando seu próximo passo…</Text></Pulsante></View>;
     return <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: colors.navy, background: colors.paper, card: colors.white, text: colors.ink, border: colors.line } }}>
     <Stack.Navigator screenOptions={{ headerTintColor: colors.navy, headerShadowVisible: false, headerTitleStyle: { fontWeight: '700' }, contentStyle: { backgroundColor: colors.paper } }}>
       {customer ? <Stack.Group navigationKey={customer.id}>
@@ -84,5 +86,5 @@ function Root() {
   </NavigationContainer>;
 }
 export default function App() {
-  return <SafeAreaProvider><QueryClientProvider client={queryClient}><AuthProvider><StatusBar style="dark" /><Root /></AuthProvider></QueryClientProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><ReducedMotionConfig mode={ReduceMotion.Never} /><QueryClientProvider client={queryClient}><AuthProvider><StatusBar style="dark" /><Root /></AuthProvider></QueryClientProvider></SafeAreaProvider>;
 }

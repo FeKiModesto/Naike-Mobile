@@ -47,7 +47,7 @@ export function Detalhe() {
       <Button title={variant?.stock === 0 ? 'Sem estoque' : 'Adicionar à sacola'} icon="bag-add-outline" loading={cart.isPending}
         disabled={!variant || variant.stock < quantity || pending || offline}
         onPress={() => variant && cart.mutate({ variantId: variant.id, quantity }, { onSuccess: () => setSuccess('Sua escolha já está na sacola.') })} />
-      <Button title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'} secondary icon={isFavorite ? 'heart' : 'heart-outline'}
+      <Button title={isFavorite ? 'Remover dos favoritos' : 'Salvar nos favoritos'} secondary icon={isFavorite ? 'heart' : 'heart-outline'} pulsoIcone={isFavorite}
         loading={favorite.isPending} disabled={!variant || pending || favorites.isPending || !!favorites.error || offline}
         onPress={() => variant && favorite.mutate({ variantId: variant.id, remove: isFavorite }, { onSuccess: () => setSuccess(isFavorite ? 'Variante removida dos favoritos.' : 'Variante salva nos favoritos.') })} />
       {success && <Button title="Ir para a sacola" secondary onPress={() => navigation.navigate('Loja', { screen: 'Carrinho' })} />}
