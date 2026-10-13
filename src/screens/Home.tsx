@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Pressable, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
+import { FlatList, RefreshControl, ScrollView, Text, View, useWindowDimensions } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useProdutos, useCategorias } from '../hooks/useProdutos';
 import { Button, Chip, Field, Notice, ProductImage, State } from '../components/UI';
+import { Pressionavel } from '../components/Pressionavel';
+import { ItemDeLista } from '../components/ItemDeLista';
 import { colors, ui } from '../theme';
 import { money } from '../utils/validation';
 import type { RootStackParamList } from '../navigation/types';
@@ -35,16 +37,17 @@ export function Home() {
         <View style={ui.between}><Text style={ui.heading}>{term ? 'Suas descobertas' : 'Nossa coleção'}</Text>
           {products.data && <Text style={ui.muted}>{products.data.pages[0].total} itens</Text>}</View>
       </View>}
-      renderItem={({ item }) => {
+      renderItem={({ item, index }) => {
         const price = item.variants.length ? Math.min(...item.variants.map(v => v.price)) : null;
-        return <Pressable accessibilityRole="button" accessibilityLabel={'Ver ' + item.name}
-          onPress={() => navigation.navigate('Detalhe', { id: item.id })}
-          style={({ pressed }) => ({ flex: 1, maxWidth: ((Math.min(width, 1000) - 40 - 14 * (columns - 1)) / columns), gap: 9, opacity: pressed ? .7 : 1 })}>
+        const maxWidth = (Math.min(width, 1000) - 40 - 14 * (columns - 1)) / columns;
+        return <ItemDeLista indice={index} acomodar={false} style={{ flex: 1, maxWidth }}>
+        <Pressionavel accessibilityRole="button" accessibilityLabel={'Ver ' + item.name}
+          onPress={() => navigation.navigate('Detalhe', { id: item.id })} style={{ gap: 9 }}>
           <ProductImage uri={item.images[0]} name={item.name} height={width < 400 ? 155 : 195} />
           <Text style={{ color: colors.ink, fontWeight: '700', fontSize: 15 }} numberOfLines={2}>{item.name}</Text>
           <Text style={{ color: colors.navy, fontWeight: '800', fontSize: 16 }}>{price === null ? 'Ver disponibilidade' : money(price)}</Text>
           <Text style={ui.muted}>{item.variants.some(v => v.stock > 0) ? 'Escolha sua variante' : 'Sem estoque'}</Text>
-        </Pressable>;
+        </Pressionavel></ItemDeLista>;
       }}
       ListEmptyComponent={<State loading={products.isPending} error={products.error} title="Nenhuma peça por aqui ainda"
         text={term || category ? 'Tente outra busca ou explore todas as categorias.' : 'O catálogo da loja aparecerá aqui assim que houver produtos publicados.'}
