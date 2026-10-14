@@ -11,7 +11,6 @@ function textoOuVazio(v: unknown): string {
   return typeof v === "string" ? v : "";
 }
 
-/** Aceita ids, URLs ou objetos { id | mediaId | url } em vários nomes de campo. */
 function midias(value: Record<string, unknown>): string[] {
   const campos = [
     "mediaIds",
@@ -121,7 +120,6 @@ export const reviewService = {
         return [];
       }
     });
-    // Se existiam itens e nenhum foi aceito, o contrato mudou: mostra o erro em vez de "vazio".
     if (items.length > 0 && validas.length === 0) {
       throw new AppError(
         "Avaliação retornada em formato inválido.",

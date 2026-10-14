@@ -17,7 +17,6 @@ export function productFromResponse(value: unknown): Product {
     if (isRecord(v.options)) for (const [k, item] of Object.entries(v.options)) if (typeof item === 'string') options[k] = item;
     return { id: v.id, sku: v.sku, price: v.price, stock: v.stock, options };
   });
-  // Imagens opcionais: só utiliza URLs presentes na resposta, nunca inventa uma foto do produto.
   const images = Array.isArray(value.images) ? value.images.flatMap(i => typeof i === 'string' ? [i] : isRecord(i) && typeof i.url === 'string' ? [i.url] : []) : [];
   const optionNames = [...new Set(variants.flatMap(v => Object.keys(v.options)))];
   const rating = isRecord(value.rating) && typeof value.rating.average === 'number' && typeof value.rating.count === 'number'
@@ -33,7 +32,6 @@ export const catalogService = {
     if (!isRecord(data) || !Array.isArray(data.data) || typeof data.page !== 'number' || typeof data.pageSize !== 'number' || typeof data.total !== 'number') {
       throw new AppError('A paginação do catálogo não pôde ser lida.', 0, 'CONTRACT_ERROR');
     }
-    // A listagem pode trazer só o resumo. O preço vem sempre das variantes do detalhe.
     const products = await Promise.all(data.data.map(async item => {
       if (!isRecord(item) || typeof item.id !== 'string') throw new AppError('Produto sem identificação.', 0, 'CONTRACT_ERROR');
       return Array.isArray(item.variants) ? productFromResponse(item) : catalogService.detail(item.id, signal);

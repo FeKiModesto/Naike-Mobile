@@ -1,7 +1,6 @@
 import { useRef } from 'react';
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query';
 import { AppError } from '../utils/errors';
-/** Guarda síncrona contra dois toques no mesmo frame, sem enfileirar ações duplicadas. */
 export function useAction<T, V>(options: UseMutationOptions<T, Error, V>) {
   const locked = useRef(false);
   const mutation = useMutation<T, Error, V>({ ...options, retry: false });

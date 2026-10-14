@@ -6,7 +6,6 @@ export interface WebhookEndpoint { id: string; url: string; description?: string
 export interface Delivery { id: string; status: string; attempts?: number; createdAt?: string }
 function endpoint(value: unknown): WebhookEndpoint {
   if (!isRecord(value) || typeof value.id !== 'string' || typeof value.url !== 'string') throw new AppError('Não foi possível ler o webhook retornado.', 0, 'CONTRACT_ERROR');
-  // Whitelist impede que signingSecret entre no cache de queries.
   return { id: value.id, url: value.url, description: typeof value.description === 'string' ? value.description : undefined };
 }
 export const groupService = {
@@ -16,7 +15,7 @@ export const groupService = {
     const { data } = await api.post<unknown>('/webhooks', input);
     if (isRecord(data) && typeof data.signingSecret === 'string') {
       receiveSecret(data.signingSecret);
-      delete data.signingSecret; // Não permanece na mutation ou no cache.
+      delete data.signingSecret;
     }
     return endpoint(data);
   },

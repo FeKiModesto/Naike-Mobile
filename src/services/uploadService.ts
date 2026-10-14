@@ -3,13 +3,11 @@ import { AppError, isRecord } from "../utils/errors";
 import type { FotoSelecionada } from "../types";
 
 export const uploadService = {
-  /** Envia uma foto e devolve o mediaId (não a URL final). */
   enviar: async (
     foto: FotoSelecionada,
     signal?: AbortSignal,
   ): Promise<string> => {
     const form = new FormData();
-    // O React Native aceita { uri, name, type } como "arquivo". O tipo do TS não conhece esse formato.
     form.append("file", {
       uri: foto.uri,
       name: foto.fileName,

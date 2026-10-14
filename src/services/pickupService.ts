@@ -66,7 +66,6 @@ export function pickupFromResponse(value: unknown): PickupPoint {
 }
 
 export const pickupService = {
-  /** Sem coords a API devolve a ordem de cadastro. Isso é esperado, não é bug. */
   list: async (
     coords?: Coordenadas,
     signal?: AbortSignal,

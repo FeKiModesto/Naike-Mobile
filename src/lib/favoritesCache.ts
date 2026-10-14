@@ -24,7 +24,6 @@ export function watchFavorites(id: string) {
     if (query.queryKey.join('|') !== keys.favorites(id).join('|') || query.state.status !== 'success' || !query.state.data) return;
     const value = JSON.stringify({ data: query.state.data, updatedAt: query.state.dataUpdatedAt });
     pending = pending.catch(() => undefined).then(() => AsyncStorage.setItem(storageKey(id), value));
-    // Falha de cache não transforma uma ação já confirmada pela API em erro de compra.
     void pending.catch(() => undefined);
   });
 }

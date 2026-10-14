@@ -84,7 +84,6 @@ export const shopService = {
         ...(simulate ? { simulate } : {}),
       })
     ).data,
-  // GET com efeito de emissão: invocado somente por mutation em botão explícito.
   invoice: async (id: string) =>
     (await api.get<unknown>("/orders/" + encodeURIComponent(id) + "/invoice"))
       .data,

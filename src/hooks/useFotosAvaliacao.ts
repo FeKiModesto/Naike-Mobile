@@ -18,7 +18,7 @@ export function useFotosAvaliacao() {
       if (!permissao.granted) {
         setEstado("negada");
         setPodePedirDeNovo(permissao.canAskAgain);
-        return; // nada quebra: o formulário segue sem foto
+        return;
       }
       setEstado("concedida");
       const resultado = await ImagePicker.launchImageLibraryAsync({

@@ -5,7 +5,6 @@ import { Button, Chip, Field, Notice, ErrorNotice } from '../components/UI';
 import { isRecord } from '../utils/errors';
 import { money } from '../utils/validation';
 import { ui } from '../theme';
-/** Mantém as formas já tratadas no projeto. Valores ausentes nunca viram frete grátis. */
 export function shippingOptions(value: unknown): { name: string; price: number; days?: number }[] {
   const raw = Array.isArray(value) ? value : isRecord(value) ? value.options ?? value.quotes : undefined;
   if (!Array.isArray(raw)) return [];

@@ -3,7 +3,6 @@ import { pickupService } from "../services/pickupService";
 import { keys } from "../lib/queryClient";
 import type { Coordenadas } from "../types";
 
-/** `pronto` fica falso enquanto a localização ainda está sendo resolvida. */
 export function usePontosRetirada(
   coords: Coordenadas | undefined,
   pronto: boolean,

@@ -7,7 +7,6 @@ function texto(v: unknown): string | undefined {
   return typeof v === "string" && v.trim() !== "" ? v : undefined;
 }
 
-/** Lê o ponto de retirada do pedido em vários formatos: objeto aninhado ou só o id. */
 export function infoRetirada(order: Order): { id?: string; nome?: string } {
   const bruto: Record<string, unknown> = { ...order };
   for (const candidato of [
@@ -26,7 +25,6 @@ export function infoRetirada(order: Order): { id?: string; nome?: string } {
 
 export function usePontoDoPedido(order: Order) {
   const { id, nome } = infoRetirada(order);
-  // Só busca a lista quando tem o id e não tem o nome.
   const lista = useQuery({
     queryKey: ["pickup", "todos"],
     queryFn: ({ signal }) => pickupService.list(undefined, signal),

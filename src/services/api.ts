@@ -17,7 +17,6 @@ export function subscribeUnauthorized(callback: () => Promise<void>) {
   };
 }
 
-/** Fonte de imagem para <Image>. Só anexa as chaves quando a URL é da própria API. */
 export function uploadImageSource(idOuUrl: string) {
   const origem = baseURL.replace(/\/v1$/, "");
   const uri = /^https?:\/\//.test(idOuUrl)
@@ -67,7 +66,6 @@ api.interceptors.request.use((config) => {
     );
   config.headers.set("X-API-Key", extra?.apiKey);
   config.headers.set("X-Student-RM", extra?.studentRm);
-  // Upload multipart: nunca fixar o Content-Type. O React Native gera o boundary sozinho.
   if (typeof FormData !== "undefined" && config.data instanceof FormData)
     config.headers.delete("Content-Type");
   const token = getAuthToken();

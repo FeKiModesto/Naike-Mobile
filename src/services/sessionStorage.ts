@@ -23,7 +23,6 @@ export async function saveSession(value: LoginResponse): Promise<void> {
 }
 export async function deleteSession(): Promise<void> {
   if (Platform.OS === 'web') {
-    // Apenas remoção da credencial legada, sem persistência nova no navegador.
     if (typeof localStorage !== 'undefined') localStorage.removeItem('naike_cliente_token');
     return;
   }
