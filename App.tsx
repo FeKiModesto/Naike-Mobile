@@ -11,6 +11,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReduceMotion, ReducedMotionConfig } from 'react-native-reanimated';
 import { Pulsante } from './src/components/Pulsante';
 import { queryClient } from './src/lib/queryClient';
+import { NotificacoesProvider } from './src/contexts/NotificacoesContext';
+import { consumirNavegacaoPendente, navegacaoRef } from './src/navigation/navegacao';
 import { AuthProvider, useAuth } from './src/contexts/AuthContext';
 import { Home } from './src/screens/Home';
 import { Detalhe } from './src/screens/Detalhe';
@@ -61,7 +63,7 @@ function Root() {
   if (isLoading) return <View style={{ flex: 1, backgroundColor: colors.navy, alignItems: 'center', justifyContent: 'center', gap: 24 }}>
     <Text style={{ color: colors.white, fontSize: 46, fontWeight: '900', letterSpacing: 6 }}>NAIKE.</Text>
     <ActivityIndicator color={colors.lime} /><Pulsante><Text style={{ color: colors.white }}>Preparando seu próximo passo…</Text></Pulsante></View>;
-    return <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: colors.navy, background: colors.paper, card: colors.white, text: colors.ink, border: colors.line } }}>
+    return <NavigationContainer ref={navegacaoRef} onReady={consumirNavegacaoPendente} theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, primary: colors.navy, background: colors.paper, card: colors.white, text: colors.ink, border: colors.line } }}>
     <Stack.Navigator screenOptions={{ headerTintColor: colors.navy, headerShadowVisible: false, headerTitleStyle: { fontWeight: '700' }, contentStyle: { backgroundColor: colors.paper } }}>
       {customer ? <Stack.Group navigationKey={customer.id}>
         <Stack.Screen name="Loja" component={Loja} options={{ headerShown: false }} />
@@ -86,5 +88,5 @@ function Root() {
   </NavigationContainer>;
 }
 export default function App() {
-  return <SafeAreaProvider><ReducedMotionConfig mode={ReduceMotion.Never} /><QueryClientProvider client={queryClient}><AuthProvider><StatusBar style="dark" /><Root /></AuthProvider></QueryClientProvider></SafeAreaProvider>;
+  return <SafeAreaProvider><ReducedMotionConfig mode={ReduceMotion.Never} /><QueryClientProvider client={queryClient}><AuthProvider><NotificacoesProvider><StatusBar style="dark" /><Root /></NotificacoesProvider></AuthProvider></QueryClientProvider></SafeAreaProvider>;
 }

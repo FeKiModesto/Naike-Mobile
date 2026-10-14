@@ -6,6 +6,7 @@ import { useAdicionarAoCarrinho } from '../hooks/useCarrinho';
 import { useFavoritar, useFavoritos } from '../hooks/useFavoritos';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Chip, ErrorNotice, Notice, Page, ProductImage, State } from '../components/UI';
+import { ConviteNotificacoes } from '../components/CartaoNotificacoes';
 import { colors, ui } from '../theme';
 import { money } from '../utils/validation';
 import type { RootStackParamList } from '../navigation/types';
@@ -51,6 +52,7 @@ export function Detalhe() {
         loading={favorite.isPending} disabled={!variant || pending || favorites.isPending || !!favorites.error || offline}
         onPress={() => variant && favorite.mutate({ variantId: variant.id, remove: isFavorite }, { onSuccess: () => setSuccess(isFavorite ? 'Variante removida dos favoritos.' : 'Variante salva nos favoritos.') })} />
       {success && <Button title="Ir para a sacola" secondary onPress={() => navigation.navigate('Loja', { screen: 'Carrinho' })} />}
+      {isFavorite && <ConviteNotificacoes />}
     </>}
   </Page>;
 }

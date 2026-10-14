@@ -3,6 +3,7 @@ import { Text, View } from 'react-native';
 import { useNavigation, type NavigationProp } from '@react-navigation/native';
 import { useAuth } from '../contexts/AuthContext';
 import { Button, Notice, Page } from '../components/UI';
+import { CartaoNotificacoes } from '../components/CartaoNotificacoes';
 import { useAction } from '../hooks/useAction';
 import { ui, colors } from '../theme';
 import type { RootStackParamList } from '../navigation/types';
@@ -17,6 +18,7 @@ export function Perfil() {
     <Button title="Meus pedidos" secondary icon="receipt-outline" onPress={() => navigation.navigate('Loja', { screen: 'Pedidos' })} />
     <Button title="Pontos de retirada" secondary icon="storefront-outline" onPress={() => navigation.navigate('Retirada')} />
     <Button title="Ferramentas do grupo" secondary icon="construct-outline" onPress={() => navigation.navigate('Ferramentas')} />
+    <CartaoNotificacoes />
     <Button title="Sair da conta" icon="log-out-outline" loading={exit.isPending} onPress={() => exit.mutate(undefined)} />
     <Text style={[ui.muted, { textAlign: 'center' }]}>NAIKE · Vista o seu ritmo.</Text>
   </Page>;

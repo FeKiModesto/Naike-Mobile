@@ -58,6 +58,7 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-44 | Lista de pontos de retirada ordenada por distância, com a distância na tela | Vitor (RM565422) |
 | RF-45 | Sem posição: a lista continua, sem ordenar, com o motivo e caminho para tentar de novo | Vitor (RM565422) |
 | RF-47 | O checkout permite escolher retirada num ponto, e o pedido criado reflete a escolha | Vitor (RM565422) |
+| RF-46 | Mapa com os pontos de retirada e a loja (`MapaRetirada`, loja vinda de `GET /store/settings`) | Pedro (RM566551) |
 | RF-48 | A tela de retirada trata carregando, vazio e erro | Vitor (RM565422) |
 | RF-49 | Controles principais respondem ao toque com mola (`Pressionavel`, usado em botões, chips, cards e estrelas) | Pedro (RM566551) |
 | RF-50 | Favoritar tem confirmação visual: o coração pulsa ao ativar (`PulsoAoAtivar`) e os avisos entram com fade | Pedro (RM566551) |
@@ -67,6 +68,11 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-54 | "Reduzir movimento" do sistema: troca deslocamento/escala por opacidade, sem tirar o feedback | Pedro (RM566551) |
 | RF-55 | `ANIMACOES_ATIVAS` em `src/lib/animacoes.ts` desliga tudo; defesa na seção "Movimento" | Pedro (RM566551) |
 | RF-62 | Durações, molas e escalas vêm de um arquivo único (`src/lib/animacoes.ts`) | Pedro (RM566551) |
+| RF-56 | Permissão de notificação pedida depois de favoritar (ou no Perfil), nunca na abertura. Três desfechos: indefinida, concedida e negada | Pedro (RM566551) |
+| RF-57 | Caminho B: canal do Android criado e o app consome o histórico da loja (`GET /push/messages`) | Pedro (RM566551) |
+| RF-58 | Payload tratado por inteiro: título e corpo para a pessoa, `data` para o app | Pedro (RM566551) |
+| RF-59 | O toque abre o produto de `data.produtoId`, inclusive com o app fechado | Pedro (RM566551) |
+| RF-60 | Permissão negada: o app segue inteiro e o Perfil explica o estado e como reativar | Pedro (RM566551) |
 
 
 ---
@@ -202,7 +208,18 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 
 ## Notificações — caminho escolhido (CP5)
 
-> A preencher pelo integrante responsável após implementação.
+**Caminho B (notificação local).** Escolhemos o B porque roda no Expo Go, sem development build, sem credencial do Firebase e sem aparelho Android, e o enunciado diz que os dois caminhos valem o mesmo. Não implementamos o Caminho A: não registramos aparelho em `/customers/me/devices` e não usamos token de push.
+
+**Como funciona**
+1. Na abertura o app só **lê** a permissão (`getPermissionsAsync`). Não pede, porque a pessoa ainda não sabe o que ganha.
+2. Se já estiver concedida, o app busca `GET /push/messages?status=SENT` e apresenta como notificação local as mensagens ainda não vistas, no máximo 3 por abertura. Os ids já apresentados ficam no AsyncStorage para não repetir.
+3. A permissão é pedida em dois momentos: no convite que aparece **depois de favoritar** um produto (Detalhe) e no cartão "Avisos da loja" do Perfil.
+4. O canal do Android (`default`) é criado antes de pedir a permissão e antes de agendar qualquer aviso.
+5. **Deep link:** o toque abre a tela do produto de `data.produtoId`. Com o app fechado, o toque é lido por `getLastNotificationResponse()` e o destino fica guardado em `src/navigation/navegacao.ts` até o `onReady` do navegador. Um mesmo toque não navega duas vezes.
+
+**Três desfechos da permissão (Perfil):** *indefinida* (explica o ganho e oferece ativar), *concedida* (confirma) e *negada* (o app segue inteiro, explica o que se perde e, se o sistema não aceita mais perguntar, mostra o caminho pelos ajustes do aparelho com um botão para abri-los). Ao voltar dos ajustes o estado se atualiza sozinho.
+
+**API do `expo-notifications` 0.32:** usamos `shouldShowBanner` e `shouldShowList` no handler e `getLastNotificationResponse()` síncrono. Não usamos `getExpoPushTokenAsync`.
 
 ---
 
@@ -237,6 +254,15 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 
 ---
 
+## O que não funciona / limitações do CP5
+
+- **Notificações:** só Caminho B. Sem push remoto, o aviso só aparece quando o app é aberto. Se o usuário não abrir o app, nada chega.
+- O formato exato da resposta de `GET /push/messages` e de `GET /store/settings` não está documentado. O app lê vários formatos possíveis, mas **não foi testado contra a API real** (sem a chave da loja no ambiente de desenvolvimento). Se o painel não tiver mensagens enviadas ou a localização da loja, não aparece aviso e o mapa fica sem o marcador da loja.
+- **Mapa:** funciona no Expo Go. Um APK/AAB próprio no Android exige chave do Google Maps (não versionada). Na web, o mapa é substituído por um aviso e a lista continua.
+- Mapa, notificações e movimento foram verificados com `tsc` e bundle, mas **não testados em aparelho** por quem escreveu. É preciso testar no celular: permissões negadas, "Reduzir movimento" e deep link com o app fechado.
+
+---
+
 ## Uso de IA
 
 O grupo utilizou ferramentas de IA como apoio pontual durante o desenvolvimento, principalmente para verificação de erros, validação de integrações e garantia de funcionamento dos fluxos implementados.
@@ -248,6 +274,7 @@ O grupo utilizou ferramentas de IA como apoio pontual durante o desenvolvimento,
 
 **CP5:**
 - Auxílio na implementação do movimento (Reanimated 4): vocabulário em `src/lib/animacoes.ts`, componentes `Pressionavel`, `PulsoAoAtivar`, `Pulsante` e `ItemDeLista` e o modo "Reduzir movimento". A estrutura se baseou no repositório de referência da turma (`mockmerce-app`, semana 07). O que mudou depois de gerar: o modo `reduzido` (a referência não trata o "Reduzir movimento"), a constante `ANIMACOES_ATIVAS`, o `acomodar` das listas e a defesa escrita acima.
+- Notificações (Caminho B), mapa de retirada e correção do `pickupService`. Ferramenta: Claude Code, com o repositório de referência da turma (`mockmerce-app`) e a documentação da API como base. O que mudamos depois de gerar: escolhemos o Caminho B no lugar do A da referência, trocamos o token FCM por notificação local a partir de `/push/messages`, e o convite de permissão passou a aparecer depois de favoritar.
 - Auxílio na identificação e correção de erros durante a implementação das avaliações
 - Verificação do contrato dos endpoints `/reviews`, `/reviews/can-review` e `POST /reviews`
 

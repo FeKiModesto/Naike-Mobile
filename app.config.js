@@ -33,6 +33,9 @@ export default {
   ["expo-image-picker", {
     photosPermission: "A Naike usa suas fotos para anexar às avaliações."
   }],
+  ["expo-notifications", {
+    color: "#050061"
+  }],
   ["expo-location", {
     locationWhenInUsePermission: "A Naike usa sua localização para mostrar os pontos de retirada mais próximos."
   }]],
