@@ -112,6 +112,8 @@ STUDENT_RM=rm_do_integrante_aqui
 
    > ⚠️ A API key acima será revogada após a correção da atividade. Cada integrante deve preencher o próprio RM em `STUDENT_RM` para que o painel registre a atividade individual.
 
+   > Opcional: `GOOGLE_MAPS_API_KEY` só é necessária para gerar um APK/AAB próprio no Android. No Expo Go o mapa funciona sem ela. A chave fica só no `.env`, nunca no Git.
+
 4. Inicie o projeto:
 ```bash
    npx expo start
@@ -293,6 +295,8 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 ## Uso de IA
 
 O grupo utilizou ferramentas de IA como apoio pontual durante o desenvolvimento, principalmente para verificação de erros, validação de integrações e garantia de funcionamento dos fluxos implementados.
+
+**Observação:** além das ferramentas de IA, o grupo também usou como apoio o repositório das aulas do professor, como referência de estrutura e de uso da API (avaliações, upload, pontos de retirada, notificações e movimento). A interface e a identidade visual são as da Naike, definidas pelo grupo no CP1, e o código foi adaptado à nossa arquitetura.
 
 **CP4:**
 - Auxílio na identificação e correção de erros de integração com a API

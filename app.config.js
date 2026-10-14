@@ -18,7 +18,10 @@ export default {
         monochromeImage: "./assets/naike-adaptive.png"
       },
       predictiveBackGestureEnabled: false,
-      package: "com.anonymous.NaikeMobile"
+      package: "com.anonymous.NaikeMobile",
+      ...(process.env.GOOGLE_MAPS_API_KEY
+        ? { config: { googleMaps: { apiKey: process.env.GOOGLE_MAPS_API_KEY } } }
+        : {})
     },
     web: {
       favicon: "./assets/naike-icon.png"
