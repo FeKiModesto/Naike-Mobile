@@ -1,3 +1,4 @@
+import './src/lib/avisosDeDesenvolvimento';
 import { registerRootComponent } from 'expo';
 
 import App from './App';
