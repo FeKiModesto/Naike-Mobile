@@ -191,7 +191,9 @@ STUDENT_RM=rm_do_integrante_aqui
 
 ## Vídeo de demonstração
 
-> A preencher: link do vídeo mostrando o fluxo completo e as permissões negadas.
+Vídeo no YouTube: https://youtu.be/pML_ZE3A9L8
+
+Mostra o app rodando no emulador Android: pontos de retirada com mapa e distância, pedido com retirada, avaliação, notificações e as permissões negadas (localização e notificação), o modo "Reduzir movimento" e as animações desligadas.
 
 ---
 
@@ -241,7 +243,7 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 
 **Como funciona**
 1. Na abertura o app só **lê** a permissão (`getPermissionsAsync`). Não pede, porque a pessoa ainda não sabe o que ganha.
-2. Se já estiver concedida, o app busca `GET /push/messages?status=SENT` e apresenta como notificação local as mensagens ainda não vistas, no máximo 3 por abertura. Os ids já apresentados ficam no AsyncStorage para não repetir.
+2. Se já estiver concedida, o app busca `GET /push/messages` e apresenta como notificação local as mensagens ainda não vistas, no máximo 3 por abertura. Sem credencial do Firebase e sem aparelho registrado, o servidor grava o envio como `SKIPPED` (`NO_DEVICE`), e esse é o caso normal do Caminho B, então o app aceita `SENT` e `SKIPPED` e descarta só `FAILED` e `NO_FAVORITE`. Só mostra mensagens do cliente logado (`customerId`). Os ids já apresentados ficam no AsyncStorage para não repetir.
 3. A permissão é pedida em dois momentos: no convite que aparece **depois de favoritar** um produto (Detalhe) e no cartão "Avisos da loja" do Perfil.
 4. O canal do Android (`default`) é criado antes de pedir a permissão e antes de agendar qualquer aviso.
 5. **Deep link:** o toque abre a tela do produto de `data.produtoId`. Com o app fechado, o toque é lido por `getLastNotificationResponse()` e o destino fica guardado em `src/navigation/navegacao.ts` até o `onReady` do navegador. Um mesmo toque não navega duas vezes.
@@ -287,6 +289,7 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 
 - **Notificações:** só Caminho B. Sem push remoto, o aviso só aparece quando o app é aberto. Se o usuário não abrir o app, nada chega.
 - O formato exato da resposta de `GET /push/messages` e de `GET /store/settings` não está documentado. O app lê vários formatos possíveis, mas **não foi testado contra a API real** (sem a chave da loja no ambiente de desenvolvimento). Se o painel não tiver mensagens enviadas ou a localização da loja, não aparece aviso e o mapa fica sem o marcador da loja.
+- **Aviso vermelho no Expo Go (Android):** ao abrir, o `expo-notifications` registra um erro dizendo que o push remoto foi removido do Expo Go no SDK 53. É esperado: usamos o Caminho B (notificação local), que não depende de push remoto, e o aviso só existe em desenvolvimento no Expo Go. Silenciamos só essa mensagem em `src/lib/avisosDeDesenvolvimento.ts`; ela continua aparecendo no terminal.
 - **Mapa:** funciona no Expo Go. Um APK/AAB próprio no Android exige chave do Google Maps (não versionada). Na web, o mapa é substituído por um aviso e a lista continua.
 - Mapa, notificações e movimento foram verificados com `tsc` e bundle, mas **não testados em aparelho** por quem escreveu. É preciso testar no celular: permissões negadas, "Reduzir movimento" e deep link com o app fechado.
 
