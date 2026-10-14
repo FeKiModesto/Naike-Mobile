@@ -23,8 +23,8 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 |---|---|---|
 | Felipe (RM561810) | Fundação do projeto, camada de API, missões do painel (produto variável, estoque), avaliações de produto (CP5) | `src/services/api.ts`, `src/services/reviewService.ts`, `src/hooks/useProdutos.ts`, `src/hooks/useProduto.ts`, `src/hooks/useProdutoVariavel.ts`, `src/hooks/useEstoque.ts`, `src/hooks/useAvaliacoes.ts`, `src/screens/Home.tsx`, `src/screens/ProdutoVariavel.tsx`, `src/screens/Estoque.tsx`, `src/screens/Detalhe.tsx`, `src/screens/Avaliacoes.tsx` |
 | Vitor (RM565422) | Autenticação do comprador, carrinho, checkout, pagamento e NF-e | `src/contexts/AuthContext.tsx`, `src/services/authToken.ts`, `src/hooks/useCheckout.ts`, `src/hooks/usePagamento.ts`, `src/hooks/useNFe.ts`, `src/screens/Login.tsx`, `src/screens/Cadastro.tsx`, `src/screens/Checkout.tsx` |
-| Pedro (RM566551) | Missões de webhook, frete, cadastro de cliente e integração de navegação | `src/hooks/useConfigurarWebhook.ts`, `src/hooks/useCotacaoFrete.ts`, `src/hooks/useCadastroCliente.ts`, `src/screens/ConfigurarWebhook.tsx`, `src/screens/CotacaoFrete.tsx`, `src/screens/CadastroCliente.tsx`, `src/screens/Pagamento.tsx` |
-| João (RM565139) | Tratamento de pagamento recusado, webhook e reembolso | `src/hooks/useProcessarPagamento.ts`, `src/hooks/useReembolso.ts` |
+| Pedro (RM566551) | Missões de webhook, frete, cadastro de cliente e integração de navegação; CP5: movimento (Reanimated) e mapa de retirada | `src/hooks/useConfigurarWebhook.ts`, `src/hooks/useCotacaoFrete.ts`, `src/hooks/useCadastroCliente.ts`, `src/screens/ConfigurarWebhook.tsx`, `src/screens/CotacaoFrete.tsx`, `src/screens/CadastroCliente.tsx`, `src/screens/Pagamento.tsx`, `src/lib/animacoes.ts`, `src/hooks/useMovimento.ts`, `src/components/Pressionavel.tsx`, `src/components/PulsoAoAtivar.tsx`, `src/components/Pulsante.tsx`, `src/components/ItemDeLista.tsx`, `src/components/MapaRetirada.tsx`, `src/services/lojaService.ts` |
+| João (RM565139) | Tratamento de pagamento recusado, webhook e reembolso; CP5: notificações (Caminho B) | `src/hooks/useProcessarPagamento.ts`, `src/hooks/useReembolso.ts`, `src/contexts/NotificacoesContext.tsx`, `src/services/pushService.ts`, `src/lib/notificacao.ts`, `src/navigation/navegacao.ts`, `src/components/CartaoNotificacoes.tsx` |
 
 ---
 
@@ -51,14 +51,14 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-37 | Consulta can-review antes do formulário, com texto específico por motivo | Felipe (RM561810) |
 | RF-38 | Formulário de avaliação com nota e comentário, com validação | Felipe (RM561810) |
 | RF-41 | Lista e média atualizadas após envio sem sair da tela | Felipe (RM561810) |
-| RF-42 | Avaliações ocultadas pela loja não aparecem no app | Felipe (RM561810) |
+| RF-42 | Avaliações ocultadas pela loja não aparecem no app (a API ainda devolve `hidden: true` ao próprio autor, então o app descarta esses itens) | Felipe (RM561810) |
 | RF-39 | Anexar foto da galeria via POST /uploads (multipart) e usar o mediaId na avaliação | Vitor (RM565422) |
 | RF-40 | Galeria negada: formulário segue funcionando e a tela explica o que se perdeu | Vitor (RM565422) |
 | RF-43 | Localização com três desfechos: concedida, negada e concedida sem posição | Vitor (RM565422) |
 | RF-44 | Lista de pontos de retirada ordenada por distância, com a distância na tela | Vitor (RM565422) |
 | RF-45 | Sem posição: a lista continua, sem ordenar, com o motivo e caminho para tentar de novo | Vitor (RM565422) |
-| RF-47 | O checkout permite escolher retirada num ponto, e o pedido criado reflete a escolha | Vitor (RM565422) |
 | RF-46 | Mapa com os pontos de retirada e a loja (`MapaRetirada`, loja vinda de `GET /store/settings`) | Pedro (RM566551) |
+| RF-47 | O checkout permite escolher retirada num ponto, e o pedido criado reflete a escolha | Vitor (RM565422) |
 | RF-48 | A tela de retirada trata carregando, vazio e erro | Vitor (RM565422) |
 | RF-49 | Controles principais respondem ao toque com mola (`Pressionavel`, usado em botões, chips, cards e estrelas) | Pedro (RM566551) |
 | RF-50 | Favoritar tem confirmação visual: o coração pulsa ao ativar (`PulsoAoAtivar`) e os avisos entram com fade | Pedro (RM566551) |
@@ -68,11 +68,11 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 | RF-54 | "Reduzir movimento" do sistema: troca deslocamento/escala por opacidade, sem tirar o feedback | Pedro (RM566551) |
 | RF-55 | `ANIMACOES_ATIVAS` em `src/lib/animacoes.ts` desliga tudo; defesa na seção "Movimento" | Pedro (RM566551) |
 | RF-62 | Durações, molas e escalas vêm de um arquivo único (`src/lib/animacoes.ts`) | Pedro (RM566551) |
-| RF-56 | Permissão de notificação pedida depois de favoritar (ou no Perfil), nunca na abertura. Três desfechos: indefinida, concedida e negada | Pedro (RM566551) |
-| RF-57 | Caminho B: canal do Android criado e o app consome o histórico da loja (`GET /push/messages`) | Pedro (RM566551) |
-| RF-58 | Payload tratado por inteiro: título e corpo para a pessoa, `data` para o app | Pedro (RM566551) |
-| RF-59 | O toque abre o produto de `data.produtoId`, inclusive com o app fechado | Pedro (RM566551) |
-| RF-60 | Permissão negada: o app segue inteiro e o Perfil explica o estado e como reativar | Pedro (RM566551) |
+| RF-56 | Permissão de notificação pedida depois de favoritar (ou no Perfil), nunca na abertura. Três desfechos: indefinida, concedida e negada | João (RM565139) |
+| RF-57 | Caminho B: canal do Android criado e o app consome o histórico da loja (`GET /push/messages`) | João (RM565139) |
+| RF-58 | Payload tratado por inteiro: título e corpo para a pessoa, `data` para o app | João (RM565139) |
+| RF-59 | O toque abre o produto de `data.produtoId`, inclusive com o app fechado | João (RM565139) |
+| RF-60 | Permissão negada: o app segue inteiro e o Perfil explica o estado e como reativar | João (RM565139) |
 
 
 ---
@@ -86,6 +86,7 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 - Axios
 - Expo Secure Store
 - React Native Reanimated 4 + Worklets (movimento)
+- Expo Location, Expo Image Picker, React Native Maps e Expo Notifications
 
 ---
 
@@ -104,12 +105,12 @@ Construído em cima do template [mockmerce-app](https://github.com/FIAP-TDSPG/mo
 
 3. Crie o arquivo `.env` na raiz com base no `.env.example`:
 ```bash
-API_URL=https://api.mockmerce.com.br/v1
+API_BASE_URL=https://api.mockmerce.com.br/v1
 API_KEY=api_gerada_aqui
-RM=rm_do_integrante_aqui
+STUDENT_RM=rm_do_integrante_aqui
 ```
 
-   > ⚠️ A API key acima será revogada após a correção da atividade. Cada integrante deve preencher o próprio RM para que o painel registre a atividade individual.
+   > ⚠️ A API key acima será revogada após a correção da atividade. Cada integrante deve preencher o próprio RM em `STUDENT_RM` para que o painel registre a atividade individual.
 
 4. Inicie o projeto:
 ```bash
@@ -167,15 +168,41 @@ RM=rm_do_integrante_aqui
 4. Se liberado, preencha a nota (1 a 5) e o comentário e toque em **Enviar avaliação**
 5. A média e a lista atualizam na mesma tela sem precisar sair
 
+### Pontos de retirada e mapa (CP5)
+1. No painel, cadastre 3 ou mais pontos espalhados e marque a localização da loja
+2. No app, abra **Perfil → Pontos de retirada**: o mapa mostra a loja e os pontos
+3. Com a localização liberada, a lista vem ordenada com a distância. Negando, a lista continua, sem distância, com o motivo e o botão **Tentar novamente**
+4. No checkout, escolha **Retirar na loja** e um ponto: o pedido chega ao painel com ele
+
+### Notificações (CP5)
+1. Favorite uma peça: o convite para ativar os avisos aparece depois, nunca na abertura
+2. No painel, dispare um push com `data: { "rota": "produto", "produtoId": "<id>" }`
+3. Abra o app (Caminho B busca o histórico ao abrir): a notificação aparece e o toque abre a peça, inclusive com o app fechado
+4. Negando a permissão, o **Perfil** explica o estado e como reativar
+
+### Movimento (CP5)
+1. Toque em botões e chips (mola), favorite uma peça (pulso) e remova um favorito (saída animada)
+2. Ligue **Remover animações** (Android) / **Reduzir movimento** (iOS) no sistema: o toque passa a escurecer, e nada fica sem feedback
+3. Para desligar tudo, troque `ANIMACOES_ATIVAS` para `false` em `src/lib/animacoes.ts`
+
+---
+
+## Vídeo de demonstração
+
+> A preencher: link do vídeo mostrando o fluxo completo e as permissões negadas.
+
 ---
 
 ## Estrutura do projeto
 ```bash
 src/
-├── contexts/ # AuthContext — sessão do comprador
-├── hooks/ # React Query (useProdutos, useProduto, useAvaliacoes...)
-├── screens/ # Telas (Home, Detalhe, Avaliacoes, Login, Checkout...)
-├── services/ # Instância do Axios, módulo de token e reviewService
+├── components/ # UI, Pressionavel, ItemDeLista, MapaRetirada, CartaoNotificacoes...
+├── contexts/ # AuthContext (sessão) e NotificacoesContext (permissão e avisos)
+├── hooks/ # React Query (useProdutos, useAvaliacoes...) e useMovimento
+├── lib/ # animacoes.ts (vocabulário de movimento), notificacao.ts, queryClient
+├── navigation/ # tipos das rotas e navegação por toque na notificação
+├── screens/ # Telas (Home, Detalhe, Avaliacoes, Retirada, Checkout...)
+├── services/ # Axios, token, reviewService, uploadService, pickupService, lojaService, pushService
 └── types/ # Interfaces TypeScript
 ```
 
@@ -217,7 +244,7 @@ A média e a contagem de avaliações vêm do campo `rating` do próprio `GET /p
 4. O canal do Android (`default`) é criado antes de pedir a permissão e antes de agendar qualquer aviso.
 5. **Deep link:** o toque abre a tela do produto de `data.produtoId`. Com o app fechado, o toque é lido por `getLastNotificationResponse()` e o destino fica guardado em `src/navigation/navegacao.ts` até o `onReady` do navegador. Um mesmo toque não navega duas vezes.
 
-**Três desfechos da permissão (Perfil):** *indefinida* (explica o ganho e oferece ativar), *concedida* (confirma) e *negada* (o app segue inteiro, explica o que se perde e, se o sistema não aceita mais perguntar, mostra o caminho pelos ajustes do aparelho com um botão para abri-los). Ao voltar dos ajustes o estado se atualiza sozinho.
+**Três desfechos da permissão (Perfil):** *indefinida* (explica o ganho e oferece ativar), *concedida* (confirma) e *negada* (o app segue inteiro, explica o que se perde, mostra sempre o caminho pelos ajustes do aparelho e, se o sistema ainda aceita perguntar, oferece "Tentar ativar de novo" com um botão para abri-los). Ao voltar dos ajustes o estado se atualiza sozinho.
 
 **API do `expo-notifications` 0.32:** usamos `shouldShowBanner` e `shouldShowList` no handler e `getLastNotificationResponse()` síncrono. Não usamos `getExpoPushTokenAsync`.
 
