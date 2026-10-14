@@ -193,6 +193,11 @@ export interface PickupPoint {
   latitude?: number;
   longitude?: number;
   distanceKm?: number;
+  hours?: string;
+}
+export interface LojaLocal {
+  name: string;
+  coords: Coordenadas;
 }
 export interface EnviarAvaliacaoInput {
   rating: number;

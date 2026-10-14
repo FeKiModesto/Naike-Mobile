@@ -20,7 +20,7 @@ function enderecoTexto(valor: unknown): string {
   return [
     valor.street,
     valor.number,
-    valor.neighborhood,
+    valor.district ?? valor.neighborhood,
     valor.city,
     valor.state,
   ]
@@ -43,7 +43,12 @@ export function pickupFromResponse(value: unknown): PickupPoint {
       "CONTRACT_ERROR",
     );
   }
-  const local = isRecord(value.location) ? value.location : value;
+  // A API manda { coordinate: { latitude, longitude } }. As outras formas ficam como tolerância.
+  const local = isRecord(value.coordinate)
+    ? value.coordinate
+    : isRecord(value.location)
+      ? value.location
+      : value;
   const metros = numero(value.distanceMeters);
   return {
     id: value.id,
@@ -54,6 +59,10 @@ export function pickupFromResponse(value: unknown): PickupPoint {
     distanceKm:
       numero(value.distanceKm) ??
       (metros !== undefined ? metros / 1000 : numero(value.distance)),
+    hours:
+      typeof value.hours === "string" && value.hours.trim() !== ""
+        ? value.hours
+        : undefined,
   };
 }
 
