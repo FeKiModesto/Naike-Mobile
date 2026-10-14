@@ -19,6 +19,7 @@ export const keys = {
       lat === undefined ? null : lat.toFixed(3),
       lng === undefined ? null : lng.toFixed(3),
     ] as const,
+  storeLocal: ["store", "local"] as const,
   products: ["products"] as const,
   product: (id: string) => ["products", "detail", id] as const,
   reviews: (productId: string) =>

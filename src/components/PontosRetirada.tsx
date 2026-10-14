@@ -3,6 +3,8 @@ import { Linking, Text, View } from 'react-native';
 import { Button, Notice, State } from './UI';
 import { useLocalizacao, type EstadoLocalizacao } from '../hooks/useLocalizacao';
 import { usePontosRetirada } from '../hooks/usePontosRetirada';
+import { useLojaLocal } from '../hooks/useLojaLocal';
+import { MapaRetirada } from './MapaRetirada';
 import { distanciaLabel, haversineKm } from '../utils/geo';
 import { colors, ui } from '../theme';
 import type { PickupPoint } from '../types';
@@ -30,13 +32,15 @@ function distanciaDoPonto(ponto: PickupPoint, estado: EstadoLocalizacao): string
   return undefined;
 }
 
-export function PontosRetirada({ selectedId, onSelect }: { selectedId?: string; onSelect?: (id: string | undefined) => void }) {
+export function PontosRetirada({ selectedId, onSelect, mapa = true }: { selectedId?: string; onSelect?: (id: string | undefined) => void; mapa?: boolean }) {
   const { estado, tentarNovamente } = useLocalizacao();
   const coords = estado.status === 'ok' ? estado.coords : undefined;
   const pontos = usePontosRetirada(coords, estado.status !== 'carregando');
+  const loja = useLojaLocal();
 
   return <View style={{ gap: 14 }}>
     <AvisoLocalizacao estado={estado} onRetry={() => void tentarNovamente()} />
+    {mapa && !!pontos.data?.length && <MapaRetirada pontos={pontos.data} loja={loja.data} usuario={coords} selectedId={selectedId} />}
     {pontos.isPending ? <State loading /> :
       pontos.error ? <State error={pontos.error} action={() => void pontos.refetch()} /> :
       !pontos.data?.length ? <State icon="storefront-outline" title="Nenhum ponto de retirada" text="A loja ainda não cadastrou pontos de retirada." actionTitle="Atualizar" action={() => void pontos.refetch()} /> :
@@ -49,6 +53,7 @@ export function PontosRetirada({ selectedId, onSelect }: { selectedId?: string; 
             {distancia ? <Text accessibilityLabel={'Distância ' + distancia} style={{ color: colors.navy, fontWeight: '800' }}>{distancia}</Text> : null}
           </View>
           {ponto.address ? <Text style={ui.muted}>{ponto.address}</Text> : null}
+          {ponto.hours ? <Text style={ui.muted}>{ponto.hours}</Text> : null}
           {onSelect && <Button title={escolhido ? 'Ponto escolhido' : 'Retirar aqui'} secondary={!escolhido}
             icon={escolhido ? 'checkmark-circle' : 'storefront-outline'} onPress={() => onSelect(escolhido ? undefined : ponto.id)} />}
         </View>;

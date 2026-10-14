@@ -28,7 +28,7 @@ export function Checkout() {
           <Chip title="Retirar na loja" selected={modo === 'retirada'} disabled={checkout.isPending} onPress={() => setModo('retirada')} />
         </View>
         {modo === 'retirada'
-          ? <PontosRetirada selectedId={pontoId} onSelect={setPontoId} />
+          ? <PontosRetirada selectedId={pontoId} onSelect={setPontoId} mapa={false} />
           : <CotacaoFrete disabled={checkout.isPending || offline} />}
         {faltaPonto && <Notice text="Escolha um ponto de retirada para continuar." />}
         <Text style={ui.muted}>Ao confirmar, suas peças serão reservadas. Você escolhe o pagamento na próxima tela.</Text>
