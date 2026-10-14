@@ -98,23 +98,29 @@ function reviewFromResponse(value: unknown): Review {
   };
 }
 
+/** O padrão da API é 10 por página, o que cortaria a lista de produtos mais avaliados. */
+const POR_PAGINA = 20;
+
 export const reviewService = {
   list: async (productId: string, signal?: AbortSignal): Promise<Review[]> => {
     const { data } = await api.get<unknown>(
       `/products/${encodeURIComponent(productId)}/reviews`,
-      { signal },
+      { params: { pageSize: POR_PAGINA }, signal },
     );
-    console.log("REVIEWS RAW", JSON.stringify(data, null, 2));
-    const items = Array.isArray(data)
+    const todas = Array.isArray(data)
       ? data
       : isRecord(data) && Array.isArray(data.data)
         ? data.data
         : [];
+    // RF-42: a API ainda devolve a avaliação ocultada pela loja para o próprio autor (hidden: true).
+    // No app ela não aparece para ninguém.
+    const items = todas.filter(
+      (item) => !(isRecord(item) && item.hidden === true),
+    );
     const validas = items.flatMap((item): Review[] => {
       try {
         return [reviewFromResponse(item)];
       } catch {
-        console.log("REVIEW IGNORADA", JSON.stringify(item));
         return [];
       }
     });

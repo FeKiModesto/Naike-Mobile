@@ -81,8 +81,7 @@ export function Avaliacoes() {
           <View style={{ flexDirection: 'row', gap: 8 }}>
             {r.mediaIds.map(mid => <Image key={mid}
   source={/^https?:\/\//.test(mid) ? { uri: mid } : uploadImageSource(mid)}
-  style={{ width: 80, height: 80, borderRadius: 10, backgroundColor: colors.line }} resizeMode="cover" accessibilityLabel="Foto da avaliação"
-  onError={e => console.log('FOTO FALHOU', mid, e.nativeEvent.error)} />)}
+  style={{ width: 80, height: 80, borderRadius: 10, backgroundColor: colors.line }} resizeMode="cover" accessibilityLabel="Foto da avaliação" />)}
           </View>
         </ScrollView>}
       <Text style={ui.muted}>{dateLabel(r.createdAt)}</Text>    
