@@ -3,7 +3,12 @@ import Animated, { useAnimatedStyle, useSharedValue } from 'react-native-reanima
 import { useMovimento } from '../hooks/useMovimento';
 import { piscadaDeOpacidade, puloDeEscala } from '../lib/animacoes';
 
-
+/**
+ * Confirmação visual de ações sem navegação (RF-50): quando `ativo` passa a true, o
+ * conteúdo dá um pulo. Reage ao estado, não ao toque: se a gravação falhar e o estado
+ * voltar, a animação não terá dito que deu certo. Só anima ao ativar, não ao desativar.
+ * Em "reduzir movimento" o pulo vira uma piscada de opacidade, então o feedback continua.
+ */
 export function PulsoAoAtivar({ ativo, children }: { ativo: boolean; children: React.ReactNode }) {
   const modo = useMovimento();
   const escala = useSharedValue(1);
