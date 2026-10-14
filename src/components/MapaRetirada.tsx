@@ -8,7 +8,6 @@ import type { Coordenadas, LojaLocal, PickupPoint } from '../types';
 export interface PropsMapa {
   pontos: PickupPoint[];
   loja?: LojaLocal | null;
-  /** Posição do cliente. Ausente quando a localização foi negada ou não veio. */
   usuario?: Coordenadas;
   selectedId?: string;
 }
@@ -30,7 +29,6 @@ function regiaoQueCabeTudo(coords: Coordenadas[]) {
   };
 }
 
-/** Pontos de retirada e a loja no mapa (RF-46). Sem nenhuma coordenada, não desenha nada. */
 export function MapaRetirada({ pontos, loja, usuario, selectedId }: PropsMapa) {
   const comLocal = useMemo(() => pontos.flatMap(ponto => ponto.latitude !== undefined && ponto.longitude !== undefined
     ? [{ ponto, coords: { latitude: ponto.latitude, longitude: ponto.longitude } }] : []), [pontos]);
@@ -40,7 +38,6 @@ export function MapaRetirada({ pontos, loja, usuario, selectedId }: PropsMapa) {
   }, [comLocal, loja, usuario]);
   if (!regiao) return null;
 
-  // `initialRegion` só vale na primeira renderização: a chave refaz o mapa quando a região muda (ex.: o GPS chegou).
   return <View accessibilityLabel="Mapa com a loja e os pontos de retirada" style={{ height: ALTURA, borderRadius: 18, overflow: 'hidden', borderWidth: 1, borderColor: colors.line }}>
     <MapView key={`${regiao.latitude.toFixed(4)},${regiao.longitude.toFixed(4)}`} style={{ flex: 1 }} initialRegion={regiao} showsUserLocation={!!usuario}>
       {loja && <Marker coordinate={loja.coords} title={loja.name} description="Nossa loja" pinColor={colors.navy} />}

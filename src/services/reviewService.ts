@@ -98,7 +98,6 @@ function reviewFromResponse(value: unknown): Review {
   };
 }
 
-/** O padrão da API é 10 por página, o que cortaria a lista de produtos mais avaliados. */
 const POR_PAGINA = 20;
 
 export const reviewService = {
@@ -112,8 +111,6 @@ export const reviewService = {
       : isRecord(data) && Array.isArray(data.data)
         ? data.data
         : [];
-    // RF-42: a API ainda devolve a avaliação ocultada pela loja para o próprio autor (hidden: true).
-    // No app ela não aparece para ninguém.
     const items = todas.filter(
       (item) => !(isRecord(item) && item.hidden === true),
     );

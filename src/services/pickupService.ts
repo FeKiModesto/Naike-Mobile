@@ -43,7 +43,6 @@ export function pickupFromResponse(value: unknown): PickupPoint {
       "CONTRACT_ERROR",
     );
   }
-  // A API manda { coordinate: { latitude, longitude } }. As outras formas ficam como tolerância.
   const local = isRecord(value.coordinate)
     ? value.coordinate
     : isRecord(value.location)

@@ -2,10 +2,8 @@ import * as Notifications from 'expo-notifications';
 import { Platform } from 'react-native';
 import { colors } from '../theme';
 
-/** O canal precisa existir antes de pedir a permissão (Android 13+) e antes de agendar qualquer aviso. */
 export const CANAL_ANDROID = 'default';
 
-// Roda no import, antes de qualquer tela. Sem isso, a notificação que chega com o app aberto some.
 Notifications.setNotificationHandler({
   handleNotification: async () => ({ shouldShowBanner: true, shouldShowList: true, shouldPlaySound: true, shouldSetBadge: false }),
 });

@@ -9,7 +9,6 @@ function texto(valor: unknown): string | undefined {
   return typeof valor === 'string' && valor.trim() !== '' ? valor : undefined;
 }
 
-/** O `data` de um push é um mapa de texto para texto. Aqui tudo vira texto, venha como vier. */
 function dadosComoTexto(valor: unknown): Record<string, string> {
   if (!isRecord(valor)) return {};
   const saida: Record<string, string> = {};
@@ -19,7 +18,6 @@ function dadosComoTexto(valor: unknown): Record<string, string> {
   return saida;
 }
 
-/** Lê um item do histórico, com o payload na raiz ou dentro de `payload` / `notification`. */
 export function mensagemFromResponse(item: unknown): MensagemPush | undefined {
   if (!isRecord(item)) return undefined;
   const id = typeof item.id === 'string' ? item.id : typeof item.id === 'number' ? String(item.id) : undefined;
@@ -36,7 +34,6 @@ export function mensagemFromResponse(item: unknown): MensagemPush | undefined {
 }
 
 export const pushService = {
-  /** Histórico de envios da loja que realmente saíram (SENT), do mais recente para o mais antigo. */
   listarEnviadas: async (signal?: AbortSignal): Promise<MensagemPush[]> => {
     const { data } = await api.get<unknown>('/push/messages', { params: { status: 'SENT', pageSize: POR_PAGINA }, signal });
     return responseList(data).flatMap(item => {

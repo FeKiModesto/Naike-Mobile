@@ -8,16 +8,10 @@ const AreaAnimada = Animated.createAnimatedComponent(Pressable);
 
 type Props = Omit<PressableProps, 'style'> & { style?: StyleProp<ViewStyle>; semAnimacao?: boolean };
 
-/**
- * Feedback de toque em um lugar só (RF-49). Modo completo: encolhe com mola.
- * Reduzir movimento ou animações desligadas: escurece, sem deslocar nada (RF-54).
- * Os valores vivem na thread de UI: tocar não re-renderiza o componente.
- */
 export function Pressionavel({ style, semAnimacao, onPressIn, onPressOut, ...resto }: Props) {
   const modo = useMovimento();
   const escala = useSharedValue(1);
   const opacidade = useSharedValue(1);
-  // A opacidade do estilo (ex.: botão desabilitado) é a base; o toque a multiplica.
   const opacidadeDoEstilo = StyleSheet.flatten(style)?.opacity;
   const base = typeof opacidadeDoEstilo === 'number' ? opacidadeDoEstilo : 1;
 

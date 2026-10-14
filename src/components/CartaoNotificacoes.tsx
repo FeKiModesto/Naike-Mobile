@@ -16,7 +16,6 @@ export function CartaoNotificacoes() {
     </>}
     {status === 'negada' && <>
       <Notice text="Os avisos estão desativados. O app continua completo: você só deixa de ver as novidades da loja." />
-      {/* RF-60: o caminho para reativar aparece sempre. "Tentar de novo" só quando o sistema ainda aceita perguntar. */}
       <Text style={ui.muted}>Para reativar: ajustes do aparelho → Apps → Naike → Notificações.</Text>
       <Button title="Abrir ajustes do aparelho" secondary icon="settings-outline" onPress={() => void Linking.openSettings()} />
       {podePedirDeNovo && <Button title="Tentar ativar de novo" secondary icon="notifications-outline" onPress={() => void pedirPermissao()} />}

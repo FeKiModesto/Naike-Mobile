@@ -8,7 +8,6 @@ function numero(valor: unknown): number | undefined {
     : undefined;
 }
 
-/** A localização da loja pode vir na raiz ou dentro de um objeto (location, coordinate…). */
 function acharCoordenadas(valor: unknown, nivel = 0): Coordenadas | undefined {
   if (!isRecord(valor) || nivel > 3) return undefined;
   const latitude = numero(valor.latitude);
@@ -34,7 +33,6 @@ function acharNome(valor: Record<string, unknown>): string | undefined {
 }
 
 export const lojaService = {
-  /** Onde a loja fica (painel: Loja → Localização). `null` enquanto ela não foi marcada. */
   local: async (signal?: AbortSignal): Promise<LojaLocal | null> => {
     const { data } = await api.get<unknown>("/store/settings", { signal });
     const corpo = isRecord(data) && isRecord(data.data) ? data.data : data;

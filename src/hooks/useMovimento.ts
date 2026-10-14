@@ -2,8 +2,6 @@ import { useSyncExternalStore } from 'react';
 import { AccessibilityInfo } from 'react-native';
 import { ANIMACOES_ATIVAS, type ModoMovimento } from '../lib/animacoes';
 
-// "Reduzir movimento" do sistema. Lido uma vez e mantido atualizado: se a pessoa mudar
-// a configuração com o app aberto, os componentes reagem sem reiniciar.
 let reduzido = false;
 const ouvintes = new Set<() => void>();
 function definir(valor: boolean) {
