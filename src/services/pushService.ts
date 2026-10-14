@@ -27,6 +27,8 @@ export function mensagemFromResponse(item: unknown): MensagemPush | undefined {
   return {
     id,
     customerId: texto(item.customerId),
+    status: texto(item.status),
+    errorCode: texto(item.errorCode),
     title: texto(notificacao.title) ?? texto(item.title),
     body: texto(notificacao.body) ?? texto(item.body),
     data: dadosComoTexto(isRecord(payload.data) ? payload.data : item.data),
@@ -35,7 +37,7 @@ export function mensagemFromResponse(item: unknown): MensagemPush | undefined {
 
 export const pushService = {
   listarEnviadas: async (signal?: AbortSignal): Promise<MensagemPush[]> => {
-    const { data } = await api.get<unknown>('/push/messages', { params: { status: 'SENT', pageSize: POR_PAGINA }, signal });
+    const { data } = await api.get<unknown>('/push/messages', { params: { pageSize: POR_PAGINA }, signal });
     return responseList(data).flatMap(item => {
       const mensagem = mensagemFromResponse(item);
       return mensagem ? [mensagem] : [];

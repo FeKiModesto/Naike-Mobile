@@ -210,6 +210,8 @@ export interface CheckoutInput {
 export interface MensagemPush {
   id: string;
   customerId?: string;
+  status?: string;
+  errorCode?: string;
   title?: string;
   body?: string;
   data: Record<string, string>;

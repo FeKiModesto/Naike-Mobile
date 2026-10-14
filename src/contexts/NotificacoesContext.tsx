@@ -53,6 +53,7 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
   const { customer } = useAuth();
   const [estado, setEstado] = useState<Estado>({ status: 'verificando', podePedirDeNovo: true });
   const sincronizando = useRef(false);
+  const repetir = useRef(false);
   const ultimoToque = useRef<string | null>(null);
   const clienteId = useRef<string | undefined>(undefined);
   clienteId.current = customer?.id;
@@ -61,18 +62,23 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
     const mensagens = await pushService.listarEnviadas();
     const vistas = await lerVistas();
     const doCliente = (m: { customerId?: string }) => !m.customerId || m.customerId === clienteId.current;
-    const novas = mensagens.filter(m => !vistas.has(m.id) && doCliente(m) && (m.title || m.body));
+    const apresentavel = (m: { status?: string; errorCode?: string }) => m.status !== 'FAILED' && m.errorCode !== 'NO_FAVORITE';
+    const novas = mensagens.filter(m => !vistas.has(m.id) && apresentavel(m) && doCliente(m) && (m.title || m.body));
     for (const m of novas.slice(0, MAX_POR_ABERTURA).reverse()) {
       await Notifications.scheduleNotificationAsync({
         content: { title: m.title ?? 'Naike', body: m.body ?? '', data: m.data },
         trigger: Platform.OS === 'android' ? { channelId: CANAL_ANDROID } : null,
       });
     }
-    await gravarVistas(new Set([...vistas, ...mensagens.map(m => m.id)]));
+    const semUso = mensagens.filter(m => !apresentavel(m) || !(m.title || m.body));
+    await gravarVistas(new Set([...vistas, ...novas.map(m => m.id), ...semUso.map(m => m.id)]));
   }, []);
 
   const sincronizar = useCallback(async () => {
-    if (sincronizando.current) return;
+    if (sincronizando.current) {
+      repetir.current = true;
+      return;
+    }
     sincronizando.current = true;
     try {
       const atual = classificar(await Notifications.getPermissionsAsync());
@@ -82,8 +88,17 @@ export function NotificacoesProvider({ children }: { children: React.ReactNode }
       setEstado({ status: 'indefinida', podePedirDeNovo: true });
     } finally {
       sincronizando.current = false;
+      if (repetir.current) {
+        repetir.current = false;
+        void sincronizar();
+      }
     }
   }, [apresentarNovas]);
+
+  const clienteDaSessao = customer?.id;
+  useEffect(() => {
+    if (clienteDaSessao) void sincronizar();
+  }, [clienteDaSessao, sincronizar]);
 
   const pedirPermissao = useCallback(async () => {
     try {
